@@ -1,0 +1,199 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Availability – VidhyaSetu</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/logo.css" />
+    <style>
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: 80px repeat(7, 1fr);
+            gap: 1px;
+            background: #e0e0ee;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .grid-header {
+            background: var(--mid);
+            color: white;
+            font-size: 12px;
+            font-weight: 700;
+            text-align: center;
+            padding: 10px 4px;
+        }
+
+        .time-label {
+            background: var(--light);
+            font-size: 11px;
+            color: #888;
+            font-weight: 600;
+            padding: 8px 10px;
+            text-align: right;
+        }
+
+        .time-slot {
+            background: #f9f9fc;
+            cursor: pointer;
+            transition: 0.2s;
+            min-height: 36px;
+        }
+
+        .time-slot:hover {
+            background: #e8e4f0;
+        }
+
+        .time-slot.available {
+            background: linear-gradient(135deg, var(--accent), var(--mid));
+        }
+
+        .time-slot.available:hover {
+            filter: brightness(1.1);
+        }
+
+        .day-labels {
+            background: var(--light);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-layout">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <img src="../assets/logo.png" class="logo-img" alt="VidhyaSetu" />
+                    <div>
+                        <h3>VidhyaSetu</h3><span>Tutor Panel</span>
+                    </div>
+                </div>
+            </div>
+            <div class="sidebar-user">
+                <div class="user-avatar" id="avatarInitial">T</div>
+                <div class="user-info">
+                    <h4 id="sidebarName">Tutor</h4><span>Tutor</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section-title">Main</div>
+                <a href="dashboard.html"><span class="nav-icon">🏠</span> Dashboard</a>
+                <a href="bookings.html"><span class="nav-icon">📋</span> Booking Requests</a>
+                <a href="chat.html"><span class="nav-icon">💬</span> Chat</a>
+                <div class="nav-section-title">Teaching</div>
+                <a href="availability.html" class="active"><span class="nav-icon">📅</span> Availability</a>
+                <a href="history.html"><span class="nav-icon">📖</span> Teaching History</a>
+                <a href="earnings.html"><span class="nav-icon">💰</span> Earnings</a>
+                <div class="nav-section-title">Account</div>
+                <a href="profile.html"><span class="nav-icon">👤</span> My Profile</a>
+                <a href="#" class="logout-link" onclick="logout()"><span class="nav-icon">🚪</span> Logout</a>
+            </nav>
+        </aside>
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+        <main class="main-content">
+            <div class="top-bar">
+                <div style="display:flex;align-items:center;gap:14px;">
+                    <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+                    <h2>Availability & Schedule</h2>
+                </div>
+                <div class="top-bar-right">
+                    <button class="btn-3d btn-primary" onclick="saveAvailability()">💾 Save Schedule</button>
+                </div>
+            </div>
+
+            <div class="page-body">
+                <!-- Legend -->
+                <div style="display:flex;gap:16px;align-items:center;margin-bottom:24px;flex-wrap:wrap;">
+                    <div style="display:flex;gap:8px;align-items:center;font-size:13px;">
+                        <div
+                            style="width:20px;height:20px;background:linear-gradient(135deg,var(--accent),var(--mid));border-radius:4px;">
+                        </div> Available
+                    </div>
+                    <div style="display:flex;gap:8px;align-items:center;font-size:13px;">
+                        <div style="width:20px;height:20px;background:#f0f0f0;border:1px solid #ddd;border-radius:4px;">
+                        </div> Unavailable
+                    </div>
+                    <p style="font-size:13px;color:#888;margin-left:8px;">Click slots to toggle availability. Save when
+                        done.</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Weekly Schedule</h3>
+                        <div style="display:flex;gap:8px;">
+                            <button class="btn-3d btn-sm btn-secondary" onclick="clearAll()">Clear All</button>
+                            <button class="btn-3d btn-sm btn-primary" onclick="selectAll()">Select All</button>
+                        </div>
+                    </div>
+                    <div style="overflow-x:auto;">
+                        <div class="schedule-grid" id="scheduleGrid" style="min-width:500px;">
+                            <!-- Built by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="../js/db-stub.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('show'); }
+        function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('show'); }
+
+        const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        const TIMES = ['6 AM', '7 AM', '8 AM', '9 AM', '10 AM', '11 AM', '12 PM', '1 PM', '2 PM', '3 PM', '4 PM', '5 PM', '6 PM', '7 PM', '8 PM', '9 PM', '10 PM'];
+        let availability = {}; // key: "Mon_9 AM" → true/false
+        let currentUid = '';
+
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) { window.location.href = '../auth/tutor-login.html'; return; }
+            currentUid = user.uid;
+            const snap = await db.collection('users').doc(user.uid).get();
+            const data = snap.data();
+            if (!data || data.role !== 'tutor') { auth.signOut(); return; }
+            document.getElementById('avatarInitial').textContent = (data.name || 'T')[0].toUpperCase();
+            document.getElementById('sidebarName').textContent = data.name || 'Tutor';
+
+            if (data.availability_slots) availability = data.availability_slots;
+            buildGrid();
+        });
+
+        function buildGrid() {
+            const grid = document.getElementById('scheduleGrid');
+            grid.innerHTML = '';
+            // Header row
+            grid.insertAdjacentHTML('beforeend', '<div class="grid-header time-label">Time</div>');
+            DAYS.forEach(d => grid.insertAdjacentHTML('beforeend', `<div class="grid-header">${d}</div>`));
+            // Time rows
+            TIMES.forEach(time => {
+                grid.insertAdjacentHTML('beforeend', `<div class="time-label">${time}</div>`);
+                DAYS.forEach(day => {
+                    const key = `${day}_${time}`;
+                    const slot = document.createElement('div');
+                    slot.className = 'time-slot' + (availability[key] ? ' available' : '');
+                    slot.dataset.key = key;
+                    slot.addEventListener('click', () => { availability[key] = !availability[key]; slot.classList.toggle('available'); });
+                    grid.appendChild(slot);
+                });
+            });
+        }
+
+        function clearAll() { availability = {}; buildGrid(); }
+        function selectAll() { TIMES.forEach(t => DAYS.forEach(d => { availability[`${d}_${t}`] = true; })); buildGrid(); }
+
+        async function saveAvailability() {
+            try {
+                await db.collection('users').doc(currentUid).update({ availability_slots: availability });
+                showToast('Schedule saved successfully!', 'success');
+            } catch (err) { showToast('Failed to save: ' + err.message, 'error'); }
+        }
+    </script>
+</body>
+
+</html>

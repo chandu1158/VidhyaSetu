@@ -1,0 +1,187 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Teaching History – VidhyaSetu</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/logo.css" />
+</head>
+
+<body>
+    <div class="dashboard-layout">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <img src="../assets/logo.png" class="logo-img" alt="VidhyaSetu" />
+                    <div>
+                        <h3>VidhyaSetu</h3><span>Tutor Panel</span>
+                    </div>
+                </div>
+            </div>
+            <div class="sidebar-user">
+                <div class="user-avatar" id="avatarInitial">T</div>
+                <div class="user-info">
+                    <h4 id="sidebarName">Tutor</h4><span id="skillBadge">—</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section-title">Main</div>
+                <a href="dashboard.html"><span class="nav-icon">🏠</span> Dashboard</a>
+                <a href="bookings.html"><span class="nav-icon">📋</span> Booking Requests</a>
+                <a href="chat.html"><span class="nav-icon">💬</span> Chat</a>
+                <div class="nav-section-title">Teaching</div>
+                <a href="availability.html"><span class="nav-icon">📅</span> Availability</a>
+                <a href="history.html" class="active"><span class="nav-icon">📖</span> Teaching History</a>
+                <a href="earnings.html"><span class="nav-icon">💰</span> Earnings</a>
+                <div class="nav-section-title">Account</div>
+                <a href="profile.html"><span class="nav-icon">👤</span> My Profile</a>
+                <a href="#" class="logout-link" onclick="logout()"><span class="nav-icon">🚪</span> Logout</a>
+            </nav>
+        </aside>
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+        <main class="main-content">
+            <div class="top-bar">
+                <div style="display:flex;align-items:center;gap:14px;">
+                    <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+                    <h2>Teaching History</h2>
+                </div>
+                <div class="top-bar-right">
+                    <div class="user-avatar" style="width:38px;height:38px;font-size:14px;" id="topAvatar">T</div>
+                </div>
+            </div>
+
+            <div class="page-body">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon icon-blue">🎓</div>
+                        <div class="stat-info">
+                            <h3 id="totalSessions">0</h3>
+                            <p>Total Sessions</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon icon-green">⏱</div>
+                        <div class="stat-info">
+                            <h3 id="totalHours">0 hrs</h3>
+                            <p>Total Hours</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon icon-gold">⭐</div>
+                        <div class="stat-info">
+                            <h3 id="avgRating">—</h3>
+                            <p>Avg Rating</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon icon-purple">👥</div>
+                        <div class="stat-info">
+                            <h3 id="uniqueStudents">0</h3>
+                            <p>Unique Students</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>All Sessions</h3>
+                        <div style="display:flex;gap:10px;align-items:center;">
+                            <input type="text" id="histSearch" placeholder="🔍 Search…"
+                                style="padding:8px 14px;border:2px solid #e0e0ee;border-radius:10px;font-family:'Outfit',sans-serif;font-size:13px;"
+                                oninput="searchHistory()" />
+                            <select id="histSubject" onchange="searchHistory()"
+                                style="padding:8px 14px;border:2px solid #e0e0ee;border-radius:10px;font-family:'Outfit',sans-serif;font-size:13px;background:#fafafa;">
+                                <option value="">All Subjects</option>
+                                <option value="Java">Java</option>
+                                <option value="C-Language">C Language</option>
+                                <option value="FullStackDevelopment">Full Stack</option>
+                                <option value="Data Structures">Data Structures</option>
+                                <option value="ComputerNetworks">Computer Networks</option>
+                                <option value="Operating System">Operating System</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="overflow-x:auto;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Student</th>
+                                    <th>Subject</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Duration</th>
+                                    <th>Mode</th>
+                                    <th>Amount</th>
+                                    <th>Rating</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <div id="toast" class="toast"></div>
+    <script src="../js/db-stub.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('show'); }
+        function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('show'); }
+
+        let allHistory = [];
+
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) { window.location.href = '../auth/tutor-login.html'; return; }
+            const snap = await db.collection('users').doc(user.uid).get();
+            const data = snap.data() || JSON.parse(localStorage.getItem('vs_userdata') || '{}');
+            if (!data || data.role !== 'tutor') { auth.signOut(); return; }
+            document.getElementById('avatarInitial').textContent = (data.name || 'T')[0].toUpperCase();
+            document.getElementById('topAvatar').textContent = (data.name || 'T')[0].toUpperCase();
+            document.getElementById('sidebarName').textContent = data.name || 'Tutor';
+            document.getElementById('skillBadge').textContent = data.skillLevel || '—';
+
+            try {
+                const bSnap = await db.collection('bookings').where('tutorId', '==', user.uid).where('status', '==', 'completed').orderBy('createdAt', 'desc').get();
+                allHistory = bSnap.docs.map(d => ({ ...d.data() }));
+            } catch { allHistory = []; }
+            updateStats(allHistory); renderHistory(allHistory);
+        });
+
+        function updateStats(list) {
+            document.getElementById('totalSessions').textContent = list.length;
+            document.getElementById('totalHours').textContent = list.length + ' hrs';
+            const ratings = list.filter(h => h.rating).map(h => h.rating);
+            document.getElementById('avgRating').textContent = ratings.length ? (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(1) : '—';
+            document.getElementById('uniqueStudents').textContent = [...new Set(list.map(h => h.student || h.studentName))].length;
+        }
+
+        function stars(r) { return '⭐'.repeat(r || 0); }
+
+        function renderHistory(list) {
+            document.getElementById('historyBody').innerHTML = list.length
+                ? list.map((h, i) => `<tr>
+            <td>${i + 1}</td><td>${h.student || h.studentName || '—'}</td><td>${h.subject || '—'}</td>
+            <td>${h.date || '—'}</td><td>${h.time || '—'}</td><td>${h.duration || '1 hr'}</td>
+            <td><span class="badge badge-purple">${h.mode || 'Online'}</span></td>
+            <td><strong>${h.amount || '—'}</strong></td><td>${stars(h.rating)}</td>
+          </tr>`).join('')
+                : '<tr><td colspan="9" style="text-align:center;padding:40px;color:#aaa;">No sessions completed yet.</td></tr>';
+        }
+
+        function searchHistory() {
+            const q = document.getElementById('histSearch').value.toLowerCase();
+            const sub = document.getElementById('histSubject').value;
+            renderHistory(allHistory.filter(h =>
+                (!q || (h.student || h.studentName || '').toLowerCase().includes(q)) &&
+                (!sub || h.subject === sub)
+            ));
+        }
+    </script>
+</body>
+
+</html>

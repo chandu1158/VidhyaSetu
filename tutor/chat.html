@@ -1,0 +1,173 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tutor Chat – VidhyaSetu</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/logo.css" />
+</head>
+
+<body>
+    <div class="dashboard-layout">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <img src="../assets/logo.png" class="logo-img" alt="VidhyaSetu" />
+                    <div>
+                        <h3>VidhyaSetu</h3><span>Tutor Panel</span>
+                    </div>
+                </div>
+            </div>
+            <div class="sidebar-user">
+                <div class="user-avatar" id="avatarInitial">T</div>
+                <div class="user-info">
+                    <h4 id="sidebarName">Tutor</h4><span>Tutor</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section-title">Main</div>
+                <a href="dashboard.html"><span class="nav-icon">🏠</span> Dashboard</a>
+                <a href="bookings.html"><span class="nav-icon">📋</span> Booking Requests</a>
+                <a href="chat.html" class="active"><span class="nav-icon">💬</span> Chat</a>
+                <div class="nav-section-title">Teaching</div>
+                <a href="availability.html"><span class="nav-icon">📅</span> Availability</a>
+                <a href="history.html"><span class="nav-icon">📖</span> Teaching History</a>
+                <a href="earnings.html"><span class="nav-icon">💰</span> Earnings</a>
+                <div class="nav-section-title">Account</div>
+                <a href="profile.html"><span class="nav-icon">👤</span> My Profile</a>
+                <a href="#" class="logout-link" onclick="logout()"><span class="nav-icon">🚪</span> Logout</a>
+            </nav>
+        </aside>
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+        <main class="main-content">
+            <div class="top-bar">
+                <div style="display:flex;align-items:center;gap:14px;">
+                    <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+                    <h2>Messages</h2>
+                </div>
+                <div class="top-bar-right">
+                    <div class="user-avatar" style="width:38px;height:38px;font-size:14px;" id="topAvatar">T</div>
+                </div>
+            </div>
+
+            <div style="height:calc(100vh - 72px);">
+                <div class="chat-layout" style="height:100%;">
+                    <div class="chat-sidebar">
+                        <div class="chat-sidebar-header">
+                            <h3>Students</h3>
+                            <p style="font-size:12px;color:#aaa;margin-top:4px;">Only confirmed bookings</p>
+                        </div>
+                        <div id="convList">
+                            <div id="convEmpty" style="padding:32px 20px;text-align:center;color:#aaa;font-size:13px;">
+                                <div style="font-size:36px;margin-bottom:10px;">💬</div>
+                                <p>No conversations yet.<br>Accept a booking first!</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chat-main">
+                        <div class="chat-header" id="chatHeader" style="display:none;">
+                            <div class="chat-list-avatar" id="chatAvatar"
+                                style="width:44px;height:44px;font-size:18px;">?</div>
+                            <div>
+                                <strong id="chatName">Select a conversation</strong>
+                                <p style="font-size:12px;color:#888;" id="chatSubject"></p>
+                            </div>
+                            <div style="margin-left:auto;"><span class="badge badge-success">🟢 Online</span></div>
+                        </div>
+
+                        <div class="chat-messages" id="chatMessages">
+                            <div id="chatEmptyState"
+                                style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#aaa;padding:40px;text-align:center;">
+                                <div style="font-size:48px;margin-bottom:16px;">💬</div>
+                                <p>Select a conversation to start chatting.</p>
+                            </div>
+                            <div id="messagesEnd"></div>
+                        </div>
+
+                        <div class="chat-input-area">
+                            <input type="text" id="msgInput" placeholder="Type a message…"
+                                onkeydown="if(event.key==='Enter')sendMessage()" />
+                            <button class="send-btn" onclick="sendMessage()">➤</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <div id="toast" class="toast"></div>
+    <script src="../js/db-stub.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('show'); }
+        function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('show'); }
+
+        let currentChatId = null, currentUser = null;
+
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) { window.location.href = '../auth/tutor-login.html'; return; }
+            currentUser = user;
+            const snap = await db.collection('users').doc(user.uid).get();
+            const data = snap.data();
+            if (!data || data.role !== 'tutor') { auth.signOut(); return; }
+            document.getElementById('avatarInitial').textContent = (data.name || 'T')[0].toUpperCase();
+            document.getElementById('topAvatar').textContent = (data.name || 'T')[0].toUpperCase();
+            document.getElementById('sidebarName').textContent = data.name || 'Tutor';
+
+            // Load real confirmed bookings to build conversation list
+            try {
+                const bSnap = await db.collection('bookings').where('tutorId', '==', user.uid).where('status', '==', 'confirmed').get();
+                const bookings = bSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+                if (bookings.length > 0) {
+                    document.getElementById('convEmpty').style.display = 'none';
+                    const convList = document.getElementById('convList');
+                    bookings.forEach((b, idx) => {
+                        const item = document.createElement('div');
+                        item.className = 'chat-list-item' + (idx === 0 ? ' active' : '');
+                        item.innerHTML = `
+                            <div class="chat-list-avatar">${(b.studentName || 'S')[0]}</div>
+                            <div class="chat-list-info"><h4>${b.studentName || 'Student'}</h4><p>${b.subject || ''}</p></div>
+                            <div class="chat-list-time">${b.date || ''}</div>`;
+                        item.onclick = (e) => openChat(b.studentId, b.studentName || 'Student', b.subject || '', e, item);
+                        convList.appendChild(item);
+                        if (idx === 0) openChat(b.studentId, b.studentName || 'Student', b.subject || '', null, item);
+                    });
+                }
+            } catch (e) { console.warn('Could not load conversations:', e); }
+        });
+
+        function openChat(studentId, studentName, subject, e, el) {
+            document.querySelectorAll('.chat-list-item').forEach(i => i.classList.remove('active'));
+            (el || (e && e.currentTarget))?.classList.add('active');
+            document.getElementById('chatHeader').style.display = 'flex';
+            document.getElementById('chatName').textContent = studentName;
+            document.getElementById('chatSubject').textContent = subject;
+            document.getElementById('chatAvatar').textContent = studentName[0];
+            document.getElementById('chatEmptyState').style.display = 'none';
+            currentChatId = `chat_${studentId}`;
+        }
+
+        function escapeHtml(t) { const d = document.createElement('div'); d.appendChild(document.createTextNode(t)); return d.innerHTML; }
+        function scrollToBottom() { const el = document.getElementById('chatMessages'); el.scrollTop = el.scrollHeight; }
+
+        async function sendMessage() {
+            const input = document.getElementById('msgInput');
+            const text = input.value.trim();
+            if (!text || !currentUser) return;
+            input.value = ''; input.focus();
+            const div = document.createElement('div');
+            div.className = 'message sent';
+            div.innerHTML = `<div><div class="message-bubble">${escapeHtml(text)}</div><div class="message-time">Just now</div></div>`;
+            document.getElementById('chatMessages').appendChild(div);
+            scrollToBottom();
+            try {
+                await rtdb.ref(`chats/${currentChatId}/messages`).push({ text, senderId: currentUser.uid, senderName: 'Tutor', timestamp: firebase.database.ServerValue.TIMESTAMP });
+            } catch { }
+        }
+    </script>
+</body>
+
+</html>
