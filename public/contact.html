@@ -1,0 +1,172 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contact Us – VidhyaSetu</title>
+    <meta name="description"
+        content="Get in touch with VidhyaSetu. We're here to help students, tutors, and partners." />
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/logo.css"/>
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="logo-container">
+            <img src="../assets/logo.png" class="logo-img" alt="VidhyaSetu"/>
+            <div class="brand-text">
+                <h1>VidhyaSetu</h1><span>LEARN · GROW · SUCCEED</span>
+            </div>
+        </div>
+        <div class="nav-links">
+            <a href="index.html" class="btn-3d" style="box-shadow:none;background:transparent;color:#ccc;">Home</a>
+            <a href="about.html" class="btn-3d" style="box-shadow:none;background:transparent;color:#ccc;">About</a>
+            <a href="faq.html" class="btn-3d" style="box-shadow:none;background:transparent;color:#ccc;">Help</a>
+            <div class="dropdown">
+                <button class="btn-3d btn-secondary">🎓 Student ▾</button>
+                <div class="dropdown-content">
+                    <a href="../auth/student-login.html">🔐 Student Login</a>
+                    <a href="../auth/register.html">📝 Student Register</a>
+                </div>
+            </div>
+            <div class="dropdown">
+                <button class="btn-3d btn-primary">👨‍🏫 Tutor ▾</button>
+                <div class="dropdown-content">
+                    <a href="../auth/tutor-login.html">🔐 Tutor Login</a>
+                    <a href="../auth/register.html">📝 Tutor Register</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-header">
+        <h1>Contact Us</h1>
+        <p>Have a question or need help? We'd love to hear from you.</p>
+    </div>
+    <div class="breadcrumb"><a href="index.html">Home</a><span>›</span> Contact Us</div>
+
+    <section style="background:white;">
+        <div class="container">
+            <div class="contact-grid">
+                <!-- Info Cards -->
+                <div class="contact-info-cards">
+                    <div class="contact-card">
+                        <div class="contact-icon">📧</div>
+                        <div>
+                            <h3>Email Us</h3>
+                            <a href="mailto:chandukatari05@gmail.com"
+                                style="color:var(--accent);font-weight:600;">chandukatari05@gmail.com</a>
+                            <p style="margin-top:4px;font-size:13px;color:#aaa;">Response within 24 hours</p>
+                        </div>
+                    </div>
+                    <div class="contact-card">
+                        <div class="contact-icon">📞</div>
+                        <div>
+                            <h3>Call / WhatsApp</h3>
+                            <a href="tel:+919100546623" style="color:var(--accent);font-weight:600;">+91 9100546623</a>
+                            <p style="margin-top:4px;font-size:13px;color:#aaa;">Mon–Sat, 9 AM – 6 PM IST</p>
+                        </div>
+                    </div>
+                    <div class="contact-card">
+                        <div class="contact-icon">📍</div>
+                        <div>
+                            <h3>Our Location</h3>
+                            <p style="font-weight:600;">Eluru, Andhra Pradesh</p>
+                            <p style="margin-top:4px;font-size:13px;color:#aaa;">India – 534001</p>
+                        </div>
+                    </div>
+                    <div class="contact-card">
+                        <div class="contact-icon">⏰</div>
+                        <div>
+                            <h3>Working Hours</h3>
+                            <p>Monday – Saturday</p>
+                            <p style="margin-top:4px;font-size:13px;color:#aaa;">9:00 AM – 6:00 PM IST</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Form -->
+                <div class="contact-form-card">
+                    <h2>Send us a Message</h2>
+                    <div id="form-success"
+                        style="display:none;background:#e8f5e9;border-radius:10px;padding:16px 20px;color:#2e7d32;font-weight:600;margin-bottom:20px;">
+                        ✅ Message sent! We'll get back to you soon.</div>
+                    <form id="contactForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Your Name *</label>
+                                <input type="text" id="c-name" placeholder="Full name" required />
+                            </div>
+                            <div class="form-group">
+                                <label>Email Address *</label>
+                                <input type="email" id="c-email" placeholder="you@email.com" required />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>I am a</label>
+                            <select id="c-role">
+                                <option>Student</option>
+                                <option>Tutor</option>
+                                <option>Parent</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Subject *</label>
+                            <input type="text" id="c-subject" placeholder="What is your query about?" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Message *</label>
+                            <textarea id="c-message" placeholder="Describe your question or feedback in detail..."
+                                required style="min-height:140px;"></textarea>
+                        </div>
+                        <button type="submit" class="btn-3d btn-primary btn-block"
+                            style="font-size:16px;padding:14px;">Send Message 📨</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-columns">
+            <div class="footer-section">
+                <div class="footer-logo">
+                    <img src="../assets/logo.png" class="logo-img" alt="VidhyaSetu"/><span>VidhyaSetu</span>
+                </div>
+                <p>Bridging the gap between students and expert tutors across India.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Platform</h4>
+                <a href="about.html">About Us</a><a href="contact.html">Contact</a><a href="faq.html">Help & FAQ</a>
+            </div>
+            <div class="footer-section">
+                <h4>Legal</h4>
+                <a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms & Conditions</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2025 VidhyaSetu. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <div id="toast" class="toast"></div>
+    <script>
+        document.getElementById('contactForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            // Simulate form submission
+            document.getElementById('form-success').style.display = 'block';
+            this.reset();
+            setTimeout(() => document.getElementById('form-success').style.display = 'none', 5000);
+        });
+    </script>
+</body>
+
+</html>
+
+
+
+
+
