@@ -1,0 +1,155 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Bookings – VidhyaSetu</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/logo.css" />
+</head>
+
+<body>
+    <div class="dashboard-layout">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <img src="../assets/logo.png" class="logo-img" alt="VidhyaSetu" />
+                    <div>
+                        <h3>VidhyaSetu</h3><span>Student Panel</span>
+                    </div>
+                </div>
+            </div>
+            <div class="sidebar-user">
+                <div class="user-avatar" id="avatarInitial">S</div>
+                <div class="user-info">
+                    <h4 id="sidebarName">Student</h4><span>Student</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section-title">Main</div>
+                <a href="dashboard.html"><span class="nav-icon">🏠</span> Dashboard</a>
+                <a href="search.html"><span class="nav-icon">🔍</span> Find a Tutor</a>
+                <a href="bookings.html" class="active"><span class="nav-icon">📅</span> My Bookings</a>
+                <div class="nav-section-title">Learning</div>
+                <a href="chat.html"><span class="nav-icon">💬</span> Chat</a>
+                <a href="payments.html"><span class="nav-icon">💳</span> Payments</a>
+                <div class="nav-section-title">Account</div>
+                <a href="profile.html"><span class="nav-icon">👤</span> My Profile</a>
+                <a href="#" class="logout-link" onclick="logout()"><span class="nav-icon">🚪</span> Logout</a>
+            </nav>
+        </aside>
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+        <main class="main-content">
+            <div class="top-bar">
+                <div style="display:flex;align-items:center;gap:14px;">
+                    <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+                    <h2>My Bookings</h2>
+                </div>
+                <div class="top-bar-right">
+                    <button class="notification-btn">🔔</button>
+                    <div class="user-avatar" style="width:38px;height:38px;font-size:14px;" id="topAvatar">S</div>
+                </div>
+            </div>
+
+            <div class="page-body">
+                <!-- Tab filters -->
+                <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px;">
+                    <button class="btn-3d btn-primary btn-sm filter-tab active" data-tab="all"
+                        onclick="filterTab(this,'all')">All</button>
+                    <button class="btn-3d btn-sm filter-tab" data-tab="pending" onclick="filterTab(this,'pending')"
+                        style="background:#fff3e0;color:#e65100;box-shadow:0 4px #e8d5b0;">⏳ Pending</button>
+                    <button class="btn-3d btn-sm filter-tab" data-tab="confirmed" onclick="filterTab(this,'confirmed')"
+                        style="background:#e8f5e9;color:#2e7d32;box-shadow:0 4px #b8d8b8;">✅ Confirmed</button>
+                    <button class="btn-3d btn-sm filter-tab" data-tab="completed" onclick="filterTab(this,'completed')"
+                        style="background:#e3f2fd;color:#1565c0;box-shadow:0 4px #b0d0f0;">🎓 Completed</button>
+                    <button class="btn-3d btn-sm filter-tab" data-tab="cancelled" onclick="filterTab(this,'cancelled')"
+                        style="background:#ffebee;color:#c62828;box-shadow:0 4px #f0b8b8;">❌ Cancelled</button>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Booking History</h3>
+                        <span class="badge badge-info" id="bookingCount">0 bookings</span>
+                    </div>
+                    <div id="bookingsList">
+                        <div style="text-align:center;padding:60px 20px;color:#aaa;">
+                            <div style="font-size:56px;margin-bottom:16px;">📅</div>
+                            <h3 style="color:#bbb;margin-bottom:10px;">No bookings yet</h3>
+                            <p>Start by <a href="search.html" style="color:var(--accent);font-weight:600;">finding a
+                                    tutor</a>!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="../js/db-stub.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('show'); }
+        function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('show'); }
+
+        let allBookings = [];
+
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) { window.location.href = '../auth/student-login.html'; return; }
+            const snap = await db.collection('users').doc(user.uid).get();
+            const data = snap.data();
+            if (!data || data.role !== 'student') { auth.signOut(); return; }
+            const initial = (data.name || 'S')[0].toUpperCase();
+            document.getElementById('avatarInitial').textContent = initial;
+            document.getElementById('topAvatar').textContent = initial;
+            document.getElementById('sidebarName').textContent = data.name || 'Student';
+
+            try {
+                const bSnap = await db.collection('bookings').where('studentId', '==', user.uid).orderBy('createdAt', 'desc').get();
+                allBookings = bSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+            } catch { allBookings = []; }
+            renderBookings(allBookings);
+        });
+
+        function renderBookings(list) {
+            document.getElementById('bookingCount').textContent = `${list.length} booking${list.length !== 1 ? 's' : ''}`;
+            if (!list.length) return;
+            const statusMap = { pending: 'badge-warning', confirmed: 'badge-success', completed: 'badge-info', cancelled: 'badge-danger' };
+            const iconMap = { pending: '⏳', confirmed: '✅', completed: '🎓', cancelled: '❌' };
+            document.getElementById('bookingsList').innerHTML = `
+        <div style="overflow-x:auto;">
+        <table class="data-table">
+            <thead><tr><th>Subject</th><th>Tutor</th><th>Date</th><th>Time</th><th>Mode</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>${list.map(b => `<tr>
+                <td><strong>${b.subject || '—'}</strong></td>
+                <td>${b.tutorName || 'Tutor'}</td>
+                <td>${b.date || '—'}</td>
+                <td>${b.time || '—'}</td>
+                <td><span class="badge badge-purple">${b.mode || 'Online'}</span></td>
+                <td><span class="badge ${statusMap[b.status] || 'badge-info'}">${iconMap[b.status] || ''} ${b.status || 'pending'}</span></td>
+                <td>${b.status === 'pending' ? `<button class="btn-3d btn-sm btn-danger" onclick="cancelBooking('${b.id}')">Cancel</button>` : b.status === 'confirmed' ? `<a href="chat.html" class="btn-3d btn-sm btn-primary">Chat 💬</a>` : '—'}</td>
+            </tr>`).join('')}</tbody>
+        </table></div>`;
+        }
+
+        function filterTab(el, tab) {
+            document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+            renderBookings(tab === 'all' ? allBookings : allBookings.filter(b => b.status === tab));
+        }
+
+        async function cancelBooking(id) {
+            if (!confirm('Cancel this booking?')) return;
+            try {
+                await db.collection('bookings').doc(id).update({ status: 'cancelled' });
+                allBookings = allBookings.map(b => b.id === id ? { ...b, status: 'cancelled' } : b);
+                renderBookings(allBookings);
+                showToast('Booking cancelled.', 'info');
+            } catch { showToast('Could not cancel. Try again.', 'error'); }
+        }
+    </script>
+</body>
+
+</html>

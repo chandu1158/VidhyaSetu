@@ -1,0 +1,501 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Dashboard – VidhyaSetu</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/logo.css" />
+    <style>
+        /* ── Notification Dropdown ── */
+        .notif-wrapper {
+            position: relative;
+        }
+
+        .notif-panel {
+            display: none;
+            position: absolute;
+            top: 52px;
+            right: 0;
+            width: 320px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+            z-index: 9999;
+            overflow: hidden;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .notif-panel.open {
+            display: block;
+        }
+
+        .notif-panel-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #f0f0f5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notif-panel-header h4 {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .notif-panel-header button {
+            font-size: 12px;
+            color: var(--accent);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+        }
+
+        .notif-item {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            padding: 14px 20px;
+            border-bottom: 1px solid #f9f9fc;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+
+        .notif-item:hover {
+            background: #fafafa;
+        }
+
+        .notif-item.unread {
+            background: #f0eef8;
+        }
+
+        .notif-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--accent);
+            flex-shrink: 0;
+            margin-top: 5px;
+        }
+
+        .notif-dot.read {
+            background: #ddd;
+        }
+
+        .notif-item-body p {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--dark);
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        .notif-item-body small {
+            font-size: 11px;
+            color: #aaa;
+        }
+
+        .notif-empty {
+            padding: 36px 20px;
+            text-align: center;
+            font-size: 13px;
+            color: #bbb;
+        }
+
+        /* ── Avatar with photo support ── */
+        .avatar-wrap {
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .avatar-photo {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            display: none;
+        }
+
+        .avatar-letter {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ── Quick action tiles ── */
+        .qa-tile {
+            border-radius: 14px;
+            padding: 22px 18px;
+            text-align: center;
+            text-decoration: none;
+            transition: 0.3s;
+            display: block;
+            color: white;
+        }
+
+        .qa-tile:hover {
+            transform: translateY(-4px);
+        }
+
+        .qa-tile .qa-icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .qa-tile .qa-label {
+            font-size: 13px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-layout">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <img src="../assets/logo.png" class="logo-img" alt="VidhyaSetu" />
+                    <div>
+                        <h3>VidhyaSetu</h3><span>Student Panel</span>
+                    </div>
+                </div>
+            </div>
+            <div class="sidebar-user">
+                <div class="user-avatar avatar-wrap" id="sidebarAvatar">
+                    <img id="sidebarAvatarImg" class="avatar-photo" alt="Profile" />
+                    <span class="avatar-letter" id="sidebarAvatarLetter">S</span>
+                </div>
+                <div class="user-info">
+                    <h4 id="sidebarName">Loading…</h4>
+                    <span>Student</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section-title">Main</div>
+                <a href="dashboard.html" class="active"><span class="nav-icon">🏠</span> Dashboard</a>
+                <a href="search.html"><span class="nav-icon">🔍</span> Find a Tutor</a>
+                <a href="bookings.html"><span class="nav-icon">📅</span> My Bookings</a>
+                <div class="nav-section-title">Learning</div>
+                <a href="chat.html"><span class="nav-icon">💬</span> Chat</a>
+                <a href="payments.html"><span class="nav-icon">💳</span> Payments</a>
+                <div class="nav-section-title">Account</div>
+                <a href="profile.html"><span class="nav-icon">👤</span> My Profile</a>
+                <a href="#" class="logout-link" onclick="logout()"><span class="nav-icon">🚪</span> Logout</a>
+            </nav>
+        </aside>
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <div class="top-bar">
+                <div style="display:flex;align-items:center;gap:14px;">
+                    <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+                    <h2>Dashboard</h2>
+                </div>
+                <div class="top-bar-right">
+
+                    <!-- 🔔 Notification Bell -->
+                    <div class="notif-wrapper" id="notifWrapper">
+                        <button class="notification-btn" id="notifBtn" onclick="toggleNotifs(event)">
+                            🔔
+                            <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+                        </button>
+                        <div class="notif-panel" id="notifPanel">
+                            <div class="notif-panel-header">
+                                <h4>Notifications</h4>
+                                <button onclick="markAllRead()">Mark all read ✓</button>
+                            </div>
+                            <div id="notifList">
+                                <div class="notif-empty">🔔 No notifications yet</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 👤 Profile Avatar -->
+                    <a href="profile.html"
+                        style="display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--dark);">
+                        <div class="user-avatar avatar-wrap" id="topAvatar"
+                            style="width:38px;height:38px;font-size:14px;">
+                            <img id="topAvatarImg" class="avatar-photo" alt="Profile" />
+                            <span class="avatar-letter" id="topAvatarLetter">S</span>
+                        </div>
+                        <span style="font-size:14px;font-weight:600;" id="topName">Student</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="page-body">
+
+                <!-- Welcome Banner -->
+                <div
+                    style="background:linear-gradient(135deg,var(--mid),var(--dark));color:white;border-radius:16px;padding:28px 32px;margin-bottom:28px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;">
+                    <div>
+                        <h2 style="font-size:22px;font-weight:700;margin-bottom:6px;">Welcome back, <span
+                                id="welcomeName">Student</span>! 👋</h2>
+                        <p style="opacity:0.8;font-size:14px;">Ready to continue learning? Your tutors are waiting!</p>
+                    </div>
+                    <a href="search.html" class="btn-3d btn-secondary"
+                        style="background:rgba(255,255,255,0.15);box-shadow:0 4px rgba(0,0,0,0.2);">🔍 Find a Tutor</a>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon icon-purple">📅</div>
+                        <div class="stat-info">
+                            <h3 id="activeBookings">0</h3>
+                            <p>Active Bookings</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon icon-blue">⏰</div>
+                        <div class="stat-info">
+                            <h3 id="upcomingSessions">0</h3>
+                            <p>Upcoming Sessions</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon icon-green">💬</div>
+                        <div class="stat-info">
+                            <h3 id="unreadMessages">0</h3>
+                            <p>Unread Messages</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon icon-orange">📚</div>
+                        <div class="stat-info">
+                            <h3 id="subjectCount">0</h3>
+                            <p>Subjects Enrolled</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Bookings & Quick Actions -->
+                <div class="content-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Recent Bookings</h3>
+                            <a href="bookings.html" style="font-size:13px;color:var(--accent);font-weight:600;">View All
+                                →</a>
+                        </div>
+                        <div id="recentBookingsList">
+                            <div class="list-item">
+                                <div class="list-avatar">👨‍🏫</div>
+                                <div class="list-info">
+                                    <h4>No bookings yet</h4>
+                                    <p>Book your first session!</p>
+                                </div>
+                                <a href="search.html" class="btn-3d btn-sm btn-primary" style="white-space:nowrap;">Book
+                                    Now</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Quick Actions</h3>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+                            <a href="search.html" class="qa-tile"
+                                style="background:linear-gradient(135deg,#5C5470,#2A2438);">
+                                <div class="qa-icon">🔍</div>
+                                <div class="qa-label">Find Tutor</div>
+                            </a>
+                            <a href="bookings.html" class="qa-tile"
+                                style="background:linear-gradient(135deg,#2196F3,#0D47A1);">
+                                <div class="qa-icon">📅</div>
+                                <div class="qa-label">My Bookings</div>
+                            </a>
+                            <a href="chat.html" class="qa-tile"
+                                style="background:linear-gradient(135deg,#4CAF50,#1B5E20);">
+                                <div class="qa-icon">💬</div>
+                                <div class="qa-label">Chat</div>
+                            </a>
+                            <a href="profile.html" class="qa-tile"
+                                style="background:linear-gradient(135deg,#FF9800,#E65100);">
+                                <div class="qa-icon">👤</div>
+                                <div class="qa-label">My Profile</div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upcoming Sessions -->
+                <div class="card card-full">
+                    <div class="card-header">
+                        <h3>Upcoming Sessions</h3>
+                        <span class="badge badge-info" id="sessionCountBadge">0 scheduled</span>
+                    </div>
+                    <div id="upcomingSessionsList">
+                        <div style="text-align:center;padding:40px 20px;color:#aaa;">
+                            <div style="font-size:48px;margin-bottom:14px;">📅</div>
+                            <p>No upcoming sessions. <a href="search.html"
+                                    style="color:var(--accent);font-weight:600;">Book a tutor now!</a></p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="../js/db-stub.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        /* ── Sidebar ── */
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('show');
+        }
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('sidebarOverlay').classList.remove('show');
+        }
+
+        /* ────────────────────────────────────────────────────
+           AVATAR HELPER
+           Shows actual uploaded photo if available,
+           otherwise shows the initial letter.
+        ──────────────────────────────────────────────────── */
+        function setAvatar(imgId, letterId, photoUrl, name) {
+            const letter = (name || 'S')[0].toUpperCase();
+            document.getElementById(letterId).textContent = letter;
+            if (photoUrl) {
+                const imgEl = document.getElementById(imgId);
+                imgEl.src = photoUrl;
+                imgEl.style.display = 'block';
+                document.getElementById(letterId).style.display = 'none';
+            }
+        }
+
+        /* ────────────────────────────────────────────────────
+           NOTIFICATIONS ENGINE
+        ──────────────────────────────────────────────────── */
+        let notifications = [];
+
+        function toggleNotifs(e) {
+            e.stopPropagation();
+            document.getElementById('notifPanel').classList.toggle('open');
+        }
+
+        // Close when clicking outside
+        document.addEventListener('click', () => {
+            document.getElementById('notifPanel').classList.remove('open');
+        });
+        document.getElementById('notifPanel').addEventListener('click', e => e.stopPropagation());
+
+        function pushNotif(icon, text, time, unread) {
+            notifications.push({ icon, text, time, unread });
+        }
+
+        function renderNotifs() {
+            const unreadCount = notifications.filter(n => n.unread).length;
+            const badge = document.getElementById('notifBadge');
+            if (unreadCount > 0) {
+                badge.textContent = unreadCount > 9 ? '9+' : unreadCount;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+
+            const list = document.getElementById('notifList');
+            if (notifications.length === 0) {
+                list.innerHTML = '<div class="notif-empty">🔔 No notifications yet</div>';
+                return;
+            }
+            list.innerHTML = notifications.map((n, i) => `
+        <div class="notif-item ${n.unread ? 'unread' : ''}" onclick="readNotif(${i})">
+            <div class="notif-dot ${n.unread ? '' : 'read'}"></div>
+            <div class="notif-item-body">
+                <p>${n.icon} ${n.text}</p>
+                <small>${n.time}</small>
+            </div>
+        </div>`).join('');
+        }
+
+        function readNotif(i) {
+            notifications[i].unread = false;
+            renderNotifs();
+        }
+
+        function markAllRead() {
+            notifications.forEach(n => n.unread = false);
+            renderNotifs();
+        }
+
+        /* ────────────────────────────────────────────────────
+           AUTH GUARD + LOAD USER DATA
+        ──────────────────────────────────────────────────── */
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) { window.location.href = '../auth/student-login.html'; return; }
+
+            // Get user data from stub (localStorage)
+            const snap = await db.collection('users').doc(user.uid).get();
+            const data = snap.data() || JSON.parse(localStorage.getItem('vs_userdata') || '{}');
+
+            if (!data || data.role !== 'student') {
+                await auth.signOut();
+                window.location.href = '../auth/student-login.html';
+                return;
+            }
+
+            const firstName = data.name ? data.name.split(' ')[0] : 'Student';
+            document.getElementById('welcomeName').textContent = firstName;
+            document.getElementById('sidebarName').textContent = data.name || 'Student';
+            document.getElementById('topName').textContent = firstName;
+
+            // ── Set profile photo or initial letter ──
+            const photo = data.profilePhoto || '';
+            setAvatar('sidebarAvatarImg', 'sidebarAvatarLetter', photo, data.name);
+            setAvatar('topAvatarImg', 'topAvatarLetter', photo, data.name);
+
+            document.getElementById('subjectCount').textContent = (data.subjects || []).length;
+
+            // ── Bookings ──
+            const bSnap = await db.collection('bookings').where('studentId', '==', user.uid).get();
+            const bookings = bSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+            const confirmed = bookings.filter(b => b.status === 'confirmed').length;
+            const pending = bookings.filter(b => b.status === 'pending').length;
+
+            document.getElementById('activeBookings').textContent = confirmed;
+            document.getElementById('upcomingSessions').textContent = confirmed;
+            document.getElementById('sessionCountBadge').textContent = `${confirmed} scheduled`;
+
+            if (bookings.length > 0) {
+                document.getElementById('recentBookingsList').innerHTML = bookings.slice(0, 3).map(b => `
+            <div class="list-item">
+                <div class="list-avatar">👨‍🏫</div>
+                <div class="list-info">
+                    <h4>${b.subject || 'Session'}</h4>
+                    <p>${b.tutorName || 'Tutor'} · ${b.date || 'Date TBD'}</p>
+                </div>
+                <span class="badge badge-${b.status === 'confirmed' ? 'success' : b.status === 'pending' ? 'warning' : 'danger'}">${b.status || 'pending'}</span>
+            </div>`).join('');
+            }
+
+            // ── Build smart notifications from real data ──
+            pushNotif('👋', `Welcome back, ${firstName}!`, 'Now', false);
+            if (confirmed > 0)
+                pushNotif('📅', `You have ${confirmed} confirmed session${confirmed > 1 ? 's' : ''} coming up.`, 'Today', true);
+            if (pending > 0)
+                pushNotif('⏳', `${pending} booking${pending > 1 ? 's are' : ' is'} waiting for tutor confirmation.`, 'Today', true);
+            if ((data.subjects || []).length === 0)
+                pushNotif('📚', 'Add subjects to your profile to find matching tutors!', 'Tip', true);
+            renderNotifs();
+        });
+    </script>
+</body>
+
+</html>

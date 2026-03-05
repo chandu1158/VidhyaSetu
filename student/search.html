@@ -1,0 +1,293 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Search Tutors – VidhyaSetu</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/logo.css" />
+</head>
+
+<body>
+    <div class="dashboard-layout">
+        <!-- SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <img src="../assets/logo.png" class="logo-img" alt="VidhyaSetu" />
+                    <div>
+                        <h3>VidhyaSetu</h3><span>Student Panel</span>
+                    </div>
+                </div>
+            </div>
+            <div class="sidebar-user">
+                <div class="user-avatar" id="avatarInitial">S</div>
+                <div class="user-info">
+                    <h4 id="sidebarName">Student</h4><span>Student</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section-title">Main</div>
+                <a href="dashboard.html"><span class="nav-icon">🏠</span> Dashboard</a>
+                <a href="search.html" class="active"><span class="nav-icon">🔍</span> Find a Tutor</a>
+                <a href="bookings.html"><span class="nav-icon">📅</span> My Bookings</a>
+                <div class="nav-section-title">Learning</div>
+                <a href="chat.html"><span class="nav-icon">💬</span> Chat</a>
+                <a href="payments.html"><span class="nav-icon">💳</span> Payments</a>
+                <div class="nav-section-title">Account</div>
+                <a href="profile.html"><span class="nav-icon">👤</span> My Profile</a>
+                <a href="#" class="logout-link" onclick="logout()"><span class="nav-icon">🚪</span> Logout</a>
+            </nav>
+        </aside>
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+        <main class="main-content">
+            <div class="top-bar">
+                <div style="display:flex;align-items:center;gap:14px;">
+                    <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+                    <h2>Find a Tutor</h2>
+                </div>
+                <div class="top-bar-right">
+                    <button class="notification-btn">🔔</button>
+                    <a href="profile.html"
+                        style="display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--dark);">
+                        <div class="user-avatar" style="width:38px;height:38px;font-size:14px;" id="topAvatar">S</div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="page-body">
+                <!-- Filters -->
+                <div class="filter-bar">
+                    <div class="filter-group">
+                        <label>Subject</label>
+                        <select id="f-subject" onchange="filterTutors()">
+                            <option value="">All Subjects</option>
+                            <option value="Java">Java</option>
+                            <option value="C-Language">C Language</option>
+                            <option value="FullStackDevelopment">Full Stack Dev</option>
+                            <option value="Data Structures">Data Structures</option>
+                            <option value="ComputerNetworks">Computer Networks</option>
+                            <option value="Operating System">Operating System</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Skill Level</label>
+                        <select id="f-level" onchange="filterTutors()">
+                            <option value="">All Levels</option>
+                            <option value="Beginner">Beginner</option>
+                            <option value="Intermediate">Intermediate</option>
+                            <option value="Advanced">Advanced</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Teaching Mode</label>
+                        <select id="f-mode" onchange="filterTutors()">
+                            <option value="">Any Mode</option>
+                            <option value="Online">Online</option>
+                            <option value="Offline">Offline</option>
+                            <option value="Both">Both</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Location</label>
+                        <input type="text" id="f-location" placeholder="e.g., Hyderabad" oninput="filterTutors()" />
+                    </div>
+                    <div style="flex-shrink:0;padding-bottom:2px;">
+                        <button class="btn-3d btn-primary" onclick="clearFilters()">Clear Filters</button>
+                    </div>
+                </div>
+
+                <!-- Results count -->
+                <div style="margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;">
+                    <p style="color:#888;font-size:14px;">Showing <strong id="resultCount">0</strong> tutors</p>
+                    <select id="sortBy" onchange="filterTutors()"
+                        style="padding:8px 14px;border:2px solid #e0e0ee;border-radius:10px;font-family:'Outfit',sans-serif;font-size:13px;background:#fafafa;">
+                        <option value="rating">Sort by Rating</option>
+                        <option value="experience">Sort by Experience</option>
+                        <option value="name">Sort by Name</option>
+                    </select>
+                </div>
+
+                <!-- Tutor Grid -->
+                <div class="tutor-grid" id="tutorGrid">
+                    <div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:#aaa;">
+                        <div style="font-size:48px;margin-bottom:16px;">🔍</div>
+                        <p>Loading tutors…</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Booking Modal -->
+    <div class="modal-overlay" id="bookingModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>📅 Book a Session</h3>
+                <button class="modal-close" onclick="closeModal()">✕</button>
+            </div>
+            <div id="modalTutorInfo"
+                style="display:flex;align-items:center;gap:14px;margin-bottom:24px;padding:16px;background:var(--light);border-radius:12px;">
+                <div class="user-avatar" style="font-size:24px;" id="modalAvatar">👨‍🏫</div>
+                <div><strong id="modalTutorName">Tutor Name</strong><br><small id="modalTutorSubject"
+                        style="color:#888;"></small></div>
+            </div>
+            <div class="form-group">
+                <label>Select Subject *</label>
+                <select id="bookSubject" required></select>
+            </div>
+            <div class="form-group">
+                <label>Preferred Date *</label>
+                <input type="date" id="bookDate" required />
+            </div>
+            <div class="form-group">
+                <label>Preferred Time *</label>
+                <input type="time" id="bookTime" required />
+            </div>
+            <div class="form-group">
+                <label>Session Mode *</label>
+                <select id="bookMode" required>
+                    <option value="Online">Online</option>
+                    <option value="Offline">Offline</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Message to Tutor (optional)</label>
+                <textarea id="bookMessage" placeholder="Any specific topics or requirements?"
+                    style="min-height:80px;"></textarea>
+            </div>
+            <button class="btn-3d btn-primary btn-block" id="confirmBookBtn" style="padding:14px;font-size:15px;"
+                onclick="confirmBooking()">✅ Send Booking Request</button>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="../js/db-stub.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('show'); }
+        function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('show'); }
+
+        let allTutors = [];
+        let currentTutorId = '';
+
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) { window.location.href = '../auth/student-login.html'; return; }
+            const snap = await db.collection('users').doc(user.uid).get();
+            const data = snap.data() || JSON.parse(localStorage.getItem('vs_userdata') || '{}');
+            if (!data || data.role !== 'student') { auth.signOut(); window.location.href = '../auth/student-login.html'; return; }
+            const initial = (data.name || 'S')[0].toUpperCase();
+            document.getElementById('avatarInitial').textContent = initial;
+            document.getElementById('topAvatar').textContent = initial;
+            document.getElementById('sidebarName').textContent = data.name || 'Student';
+
+            // Load only real registered tutors who passed skill test
+            try {
+                const tSnap = await db.collection('users').where('role', '==', 'tutor').where('skillTestPassed', '==', true).get();
+                allTutors = tSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+            } catch (e) { allTutors = []; }
+            filterTutors();
+        });
+
+        function levelClass(level) {
+            if (level === 'Advanced') return 'badge-info';
+            if (level === 'Intermediate') return 'badge-warning';
+            return 'badge-beginner';
+        }
+        function stars(r) { const f = Math.round(r); return '⭐'.repeat(f) + (r < 5 && f < 5 ? '☆' : ''); }
+
+        function renderTutors(tutors) {
+            document.getElementById('resultCount').textContent = tutors.length;
+            if (tutors.length === 0) {
+                document.getElementById('tutorGrid').innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px;color:#aaa;"><div style="font-size:56px;margin-bottom:16px;">🔍</div><h3 style="color:#bbb;margin-bottom:10px;">No tutors found</h3><p>Try adjusting your filters.</p></div>`;
+                return;
+            }
+            document.getElementById('tutorGrid').innerHTML = tutors.map(t => `
+        <div class="tutor-card fade-in">
+            <div class="tutor-avatar">${(t.name || 'T')[0]}</div>
+            <h3>${t.name || 'Tutor'}</h3>
+            <p class="tutor-occupation">${t.occupation || t.experience || 'Educator'} · ${t.location || 'India'}</p>
+            <div class="tutor-subjects">
+                ${(t.subjects || []).slice(0, 3).map(s => `<span class="subject-tag">${s}</span>`).join('')}
+            </div>
+            <div class="tutor-meta">
+                <div><strong>${t.sessions || 0}</strong><span>Sessions</span></div>
+                <div><strong><span class="badge ${levelClass(t.skillLevel)}">${t.skillLevel || 'Beginner'}</span></strong><span>Level</span></div>
+                <div><strong>${t.availability || 'Online'}</strong><span>Mode</span></div>
+            </div>
+            <div style="text-align:center;margin-bottom:16px;">
+                <span class="stars">${stars(t.rating || 4.0)}</span>
+                <span style="font-size:13px;color:#888;margin-left:6px;">${(t.rating || 4.0).toFixed(1)} / 5.0</span>
+            </div>
+            <button class="btn-3d btn-primary btn-block" onclick="openBooking('${t.id}','${t.name}','${(t.subjects || []).join(',')}')">📅 Book Session</button>
+        </div>`).join('');
+        }
+
+        function filterTutors() {
+            const sub = document.getElementById('f-subject').value;
+            const lvl = document.getElementById('f-level').value;
+            const mode = document.getElementById('f-mode').value;
+            const loc = document.getElementById('f-location').value.toLowerCase();
+            const sort = document.getElementById('sortBy').value;
+
+            let filtered = allTutors.filter(t => {
+                if (sub && !(t.subjects || []).includes(sub)) return false;
+                if (lvl && t.skillLevel !== lvl) return false;
+                if (mode && t.availability !== mode && t.availability !== 'Both') return false;
+                if (loc && !(t.location || '').toLowerCase().includes(loc)) return false;
+                return true;
+            });
+
+            if (sort === 'rating') filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+            else if (sort === 'name') filtered.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+            renderTutors(filtered);
+        }
+
+        function clearFilters() {
+            ['f-subject', 'f-level', 'f-mode'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('f-location').value = '';
+            filterTutors();
+        }
+
+        function openBooking(tutorId, tutorName, subjects) {
+            currentTutorId = tutorId;
+            document.getElementById('modalTutorName').textContent = tutorName;
+            document.getElementById('modalTutorSubject').textContent = subjects.split(',').join(' · ');
+            document.getElementById('modalAvatar').textContent = tutorName[0];
+            const sel = document.getElementById('bookSubject');
+            sel.innerHTML = subjects.split(',').map(s => `<option value="${s}">${s}</option>`).join('');
+            // Set min date to today
+            document.getElementById('bookDate').min = new Date().toISOString().split('T')[0];
+            document.getElementById('bookingModal').classList.add('open');
+        }
+        function closeModal() { document.getElementById('bookingModal').classList.remove('open'); }
+
+        async function confirmBooking() {
+            const user = auth.currentUser;
+            if (!user) return;
+            const btn = document.getElementById('confirmBookBtn');
+            btn.textContent = 'Sending…'; btn.disabled = true;
+            try {
+                await db.collection('bookings').add({
+                    studentId: user.uid,
+                    tutorId: currentTutorId,
+                    subject: document.getElementById('bookSubject').value,
+                    date: document.getElementById('bookDate').value,
+                    time: document.getElementById('bookTime').value,
+                    mode: document.getElementById('bookMode').value,
+                    message: document.getElementById('bookMessage').value,
+                    status: 'pending',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                closeModal();
+                showToast('Booking request sent! Waiting for tutor confirmation.', 'success');
+            } catch (err) { showToast('Failed to book: ' + err.message, 'error'); }
+            finally { btn.textContent = '✅ Send Booking Request'; btn.disabled = false; }
+        }
+    </script>
+</body>
+
+</html>

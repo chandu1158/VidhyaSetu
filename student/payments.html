@@ -1,0 +1,163 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Payment History – VidhyaSetu</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/logo.css" />
+</head>
+
+<body>
+    <div class="dashboard-layout">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <img src="../assets/logo.png" class="logo-img" alt="VidhyaSetu" />
+                    <div>
+                        <h3>VidhyaSetu</h3><span>Student Panel</span>
+                    </div>
+                </div>
+            </div>
+            <div class="sidebar-user">
+                <div class="user-avatar" id="avatarInitial">S</div>
+                <div class="user-info">
+                    <h4 id="sidebarName">Student</h4><span>Student</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section-title">Main</div>
+                <a href="dashboard.html"><span class="nav-icon">🏠</span> Dashboard</a>
+                <a href="search.html"><span class="nav-icon">🔍</span> Find a Tutor</a>
+                <a href="bookings.html"><span class="nav-icon">📅</span> My Bookings</a>
+                <div class="nav-section-title">Learning</div>
+                <a href="chat.html"><span class="nav-icon">💬</span> Chat</a>
+                <a href="payments.html" class="active"><span class="nav-icon">💳</span> Payments</a>
+                <div class="nav-section-title">Account</div>
+                <a href="profile.html"><span class="nav-icon">👤</span> My Profile</a>
+                <a href="#" class="logout-link" onclick="logout()"><span class="nav-icon">🚪</span> Logout</a>
+            </nav>
+        </aside>
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+        <main class="main-content">
+            <div class="top-bar">
+                <div style="display:flex;align-items:center;gap:14px;">
+                    <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+                    <h2>Payment History</h2>
+                </div>
+                <div class="top-bar-right">
+                    <div class="user-avatar" style="width:38px;height:38px;font-size:14px;" id="topAvatar">S</div>
+                </div>
+            </div>
+
+            <div class="page-body">
+                <!-- Summary Cards -->
+                <div class="stats-grid" style="margin-bottom:28px;">
+                    <div class="stat-card">
+                        <div class="stat-icon icon-green">💰</div>
+                        <div class="stat-info">
+                            <h3>₹<span id="totalSpent">0</span></h3>
+                            <p>Total Spent</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon icon-blue">🧾</div>
+                        <div class="stat-info">
+                            <h3 id="totalPayments">0</h3>
+                            <p>Total Payments</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon icon-orange">⏳</div>
+                        <div class="stat-info">
+                            <h3>₹<span id="pendingAmount">0</span></h3>
+                            <p>Pending</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon icon-purple">✅</div>
+                        <div class="stat-info">
+                            <h3>₹<span id="completedAmount">0</span></h3>
+                            <p>Completed</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>All Transactions</h3>
+                        <button class="btn-3d btn-sm btn-secondary" onclick="window.print()">🖨️ Print</button>
+                    </div>
+                    <div style="overflow-x:auto;">
+                        <table class="data-table" id="paymentsTable">
+                            <thead>
+                                <tr>
+                                    <th>Txn ID</th>
+                                    <th>Tutor</th>
+                                    <th>Subject</th>
+                                    <th>Date</th>
+                                    <th>Amount</th>
+                                    <th>Method</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="paymentsBody">
+                                <!-- Loaded by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="../js/db-stub.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('show'); }
+        function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('show'); }
+
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) { window.location.href = '../auth/student-login.html'; return; }
+            const snap = await db.collection('users').doc(user.uid).get();
+            const data = snap.data();
+            if (!data || data.role !== 'student') { auth.signOut(); return; }
+            document.getElementById('avatarInitial').textContent = (data.name || 'S')[0].toUpperCase();
+            document.getElementById('topAvatar').textContent = (data.name || 'S')[0].toUpperCase();
+            document.getElementById('sidebarName').textContent = data.name || 'Student';
+
+            let payments = [];
+            try {
+                const pSnap = await db.collection('payments').where('studentId', '==', user.uid).orderBy('createdAt', 'desc').get();
+                payments = pSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+            } catch { }
+
+            // Compute stats from real data
+            const totalSpent = payments.reduce((s, p) => s + (parseInt(p.amount) || 0), 0);
+            const pending = payments.filter(p => p.status === 'pending').reduce((s, p) => s + (parseInt(p.amount) || 0), 0);
+            const completed = payments.filter(p => p.status === 'paid').reduce((s, p) => s + (parseInt(p.amount) || 0), 0);
+            document.getElementById('totalSpent').textContent = totalSpent.toLocaleString();
+            document.getElementById('totalPayments').textContent = payments.length;
+            document.getElementById('pendingAmount').textContent = pending.toLocaleString();
+            document.getElementById('completedAmount').textContent = completed.toLocaleString();
+
+            const statusMap = { paid: 'badge-success', pending: 'badge-warning', refunded: 'badge-info', failed: 'badge-danger' };
+            document.getElementById('paymentsBody').innerHTML = payments.map(p => `
+        <tr>
+            <td><code style="background:var(--light);padding:3px 8px;border-radius:6px;font-size:12px;">${p.id}</code></td>
+            <td>${p.tutor || '—'}</td>
+            <td>${p.subject || '—'}</td>
+            <td>${p.date || '—'}</td>
+            <td><strong>₹${p.amount || 0}</strong></td>
+            <td>${p.method || 'UPI'}</td>
+            <td><span class="badge ${statusMap[p.status] || 'badge-info'}">${p.status === 'paid' ? '✅' : p.status === 'pending' ? '⏳' : p.status === 'refunded' ? '↩️' : '❌'} ${p.status}</span></td>
+        </tr>`).join('') || '<tr><td colspan="7" style="text-align:center;padding:40px;color:#aaa;">No payment records found.</td></tr>';
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,220 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat – VidhyaSetu</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/logo.css" />
+</head>
+
+<body>
+    <div class="dashboard-layout">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <img src="../assets/logo.png" class="logo-img" alt="VidhyaSetu" />
+                    <div>
+                        <h3>VidhyaSetu</h3><span>Student Panel</span>
+                    </div>
+                </div>
+            </div>
+            <div class="sidebar-user">
+                <div class="user-avatar" id="avatarInitial">S</div>
+                <div class="user-info">
+                    <h4 id="sidebarName">Student</h4><span>Student</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section-title">Main</div>
+                <a href="dashboard.html"><span class="nav-icon">🏠</span> Dashboard</a>
+                <a href="search.html"><span class="nav-icon">🔍</span> Find a Tutor</a>
+                <a href="bookings.html"><span class="nav-icon">📅</span> My Bookings</a>
+                <div class="nav-section-title">Learning</div>
+                <a href="chat.html" class="active"><span class="nav-icon">💬</span> Chat</a>
+                <a href="payments.html"><span class="nav-icon">💳</span> Payments</a>
+                <div class="nav-section-title">Account</div>
+                <a href="profile.html"><span class="nav-icon">👤</span> My Profile</a>
+                <a href="#" class="logout-link" onclick="logout()"><span class="nav-icon">🚪</span> Logout</a>
+            </nav>
+        </aside>
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+        <main class="main-content">
+            <div class="top-bar">
+                <div style="display:flex;align-items:center;gap:14px;">
+                    <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+                    <h2>Messages</h2>
+                </div>
+                <div class="top-bar-right">
+                    <div class="user-avatar" style="width:38px;height:38px;font-size:14px;" id="topAvatar">S</div>
+                </div>
+            </div>
+
+            <div style="height:calc(100vh - 72px);">
+                <div class="chat-layout" style="height:100%;">
+                    <!-- Conversation List -->
+                    <div class="chat-sidebar" id="chatSidebar">
+                        <div class="chat-sidebar-header">
+                            <h3>Conversations</h3>
+                            <p style="font-size:12px;color:#aaa;margin-top:4px;">Only with booked tutors</p>
+                        </div>
+                        <div id="convList">
+                            <div id="convEmpty" style="padding:32px 20px;text-align:center;color:#aaa;font-size:13px;">
+                                <div style="font-size:36px;margin-bottom:10px;">💬</div>
+                                <p>No conversations yet.<br>Book a session first!</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat Main -->
+                    <div class="chat-main">
+                        <div class="chat-header" id="chatHeader" style="display:none;">
+                            <div class="chat-list-avatar" id="chatAvatar"
+                                style="width:44px;height:44px;font-size:18px;">?</div>
+                            <div>
+                                <strong id="chatName">Select a conversation</strong>
+                                <p style="font-size:12px;color:#888;" id="chatSubject"></p>
+                            </div>
+                            <div style="margin-left:auto;">
+                                <span class="badge badge-success">🟢 Online</span>
+                            </div>
+                        </div>
+
+                        <div class="chat-messages" id="chatMessages">
+                            <div id="chatEmptyState"
+                                style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#aaa;padding:40px;text-align:center;">
+                                <div style="font-size:48px;margin-bottom:16px;">💬</div>
+                                <p>Select a conversation to start chatting.</p>
+                            </div>
+                            <div id="messagesEnd"></div>
+                        </div>
+
+                        <div class="chat-input-area">
+                            <input type="text" id="msgInput" placeholder="Type a message…"
+                                onkeydown="if(event.key==='Enter')sendMessage()" />
+                            <button class="send-btn" onclick="sendMessage()">➤</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="../js/db-stub.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('show'); }
+        function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('show'); }
+
+        let currentChatId = null;
+        let currentUser = null;
+        let chatListener = null;
+
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) { window.location.href = '../auth/student-login.html'; return; }
+            currentUser = user;
+            const snap = await db.collection('users').doc(user.uid).get();
+            const data = snap.data();
+            if (!data || data.role !== 'student') { auth.signOut(); return; }
+            const initial = (data.name || 'S')[0].toUpperCase();
+            document.getElementById('avatarInitial').textContent = initial;
+            document.getElementById('topAvatar').textContent = initial;
+            document.getElementById('sidebarName').textContent = data.name || 'Student';
+
+            // Load real confirmed bookings to build conversation list
+            try {
+                const bSnap = await db.collection('bookings').where('studentId', '==', user.uid).where('status', '==', 'confirmed').get();
+                const bookings = bSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+                if (bookings.length > 0) {
+                    document.getElementById('convEmpty').style.display = 'none';
+                    const convList = document.getElementById('convList');
+                    bookings.forEach((b, idx) => {
+                        const item = document.createElement('div');
+                        item.className = 'chat-list-item' + (idx === 0 ? ' active' : '');
+                        item.innerHTML = `
+                            <div class="chat-list-avatar">${(b.tutorName || 'T')[0]}</div>
+                            <div class="chat-list-info"><h4>${b.tutorName || 'Tutor'}</h4><p>${b.subject || ''}</p></div>
+                            <div class="chat-list-time">${b.date || ''}</div>`;
+                        item.onclick = (e) => openChat(b.tutorId, b.tutorName || 'Tutor', b.subject || '', e, item);
+                        convList.appendChild(item);
+                        if (idx === 0) openChat(b.tutorId, b.tutorName || 'Tutor', b.subject || '', null, item);
+                    });
+                }
+            } catch (e) { console.warn('Could not load conversations:', e); }
+        });
+
+        function openChat(tutorId, tutorName, subject, e, el) {
+            document.querySelectorAll('.chat-list-item').forEach(i => i.classList.remove('active'));
+            (el || (e && e.currentTarget))?.classList.add('active');
+            document.getElementById('chatHeader').style.display = 'flex';
+            document.getElementById('chatName').textContent = tutorName;
+            document.getElementById('chatSubject').textContent = subject;
+            document.getElementById('chatAvatar').textContent = tutorName[0];
+            document.getElementById('chatEmptyState').style.display = 'none';
+            currentChatId = `chat_${tutorId}`;
+            listenMessages(currentChatId);
+        }
+
+        function listenMessages(chatId) {
+            if (chatListener) chatListener();
+            // Using Realtime DB
+            try {
+                const ref = rtdb.ref(`chats/${chatId}/messages`);
+                chatListener = ref.limitToLast(50).on('value', snap => {
+                    const msgs = snap.val();
+                    if (!msgs) return;
+                    const container = document.getElementById('chatMessages');
+                    // Clear dynamic messages only
+                    container.querySelectorAll('.dynamic-msg').forEach(m => m.remove());
+                    Object.values(msgs).forEach(m => appendMessage(m, false));
+                    scrollToBottom();
+                });
+            } catch (e) { /* Firebase not configured – demo mode */ }
+        }
+
+        function appendMessage(msg, scroll = true) {
+            const isSent = msg.senderId === (currentUser && currentUser.uid);
+            const div = document.createElement('div');
+            div.className = `message ${isSent ? 'sent' : 'received'} dynamic-msg`;
+            const time = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Just now';
+            div.innerHTML = `
+        ${!isSent ? `<div class="chat-list-avatar" style="width:32px;height:32px;font-size:14px;flex-shrink:0;">${msg.senderName?.[0] || 'T'}</div>` : ''}
+        <div>
+            <div class="message-bubble">${escapeHtml(msg.text)}</div>
+            <div class="message-time">${time}</div>
+        </div>`;
+            document.getElementById('chatMessages').appendChild(div);
+            if (scroll) scrollToBottom();
+        }
+
+        function escapeHtml(t) { const d = document.createElement('div'); d.appendChild(document.createTextNode(t)); return d.innerHTML; }
+        function scrollToBottom() { const el = document.getElementById('chatMessages'); el.scrollTop = el.scrollHeight; }
+
+        async function sendMessage() {
+            const input = document.getElementById('msgInput');
+            const text = input.value.trim();
+            if (!text || !currentUser) return;
+            input.value = '';
+            input.focus();
+
+            // Demo: append locally
+            appendMessage({ text, senderId: currentUser.uid, senderName: 'You', timestamp: Date.now() });
+
+            // Try Firebase
+            try {
+                await rtdb.ref(`chats/${currentChatId}/messages`).push({
+                    text,
+                    senderId: currentUser.uid,
+                    senderName: 'Student',
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                });
+            } catch { /* demo mode */ }
+        }
+    </script>
+</body>
+
+</html>
