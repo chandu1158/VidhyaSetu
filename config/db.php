@@ -4,14 +4,10 @@ ob_start(); // Buffer all output to prevent warnings/notices from breaking JSON 
 //  VidhyaSetu — Database Configuration & Helpers
 //  config/db.php
 //  ⚠️ Update DB_USER, DB_PASS, DB_NAME before going live.
-// ============================================================
-
-// Local XAMPP settings
-define('DB_HOST', 'localhost');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('DB_NAME', 'chandu');
-
+define('DB_HOST', 'db.dblqxmnyozsfmtwkjbti.supabase.co');
+define('DB_USER', 'postgres');
+define('DB_PASS', 'Chandu@910054');
+define('DB_NAME', 'postgres');
 // ── CORS Headers ─────────────────────────────────────────────
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
