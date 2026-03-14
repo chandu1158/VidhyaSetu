@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Skill Test – VidhyaSetu</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="logo.css" />
+    <style>
+        body {
+            overflow: hidden;
+        }
+
+        /* ── Intro Screen ── */
+        #introScreen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: var(--dark);
+            padding: 24px;
+        }
+
+        .intro-card {
+            background: var(--mid);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .intro-card h1 {
+            font-size: 28px;
+            font-weight: 800;
+            color: white;
+            margin: 20px 0 10px;
+        }
+
+        .intro-card p {
+            color: #b0afc0;
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        .rules-list {
+            list-style: none;
+            margin: 24px 0;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .rules-list li {
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 14px;
+            color: #ccc;
+            display: flex;
+            gap: 12px;
+        }
+
+        /* ── Test Screen ── */
+        #testScreen {
+            display: none;
+            min-height: 100vh;
+            background: var(--dark);
+            flex-direction: column;
+        }
+
+        .test-header {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 14px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            flex-wrap: wrap;
+        }
+
+        .test-subject {
+            font-size: 16px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .timer-box {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid var(--accent);
+            border-radius: 12px;
+            padding: 8px 20px;
+            font-size: 22px;
+            font-weight: 800;
+            color: white;
+            font-family: monospace;
+            min-width: 90px;
+            text-align: center;
+        }
+
+        .timer-box.warning {
+            border-color: #FFD700;
+            color: #FFD700;
+        }
+
+        .timer-box.danger {
+            border-color: #ef5350;
+            color: #ef5350;
+            animation: pulse 0.8s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: 0.5
+            }
+        }
+
+        .test-progress {
+            flex: 1;
+            min-width: 160px;
+        }
+
+        .progress-bar-wrap {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), #9b59b6);
+            border-radius: 20px;
+            transition: width 0.4s;
+        }
+
+        .test-body {
+            flex: 1;
+            padding: 32px 28px;
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            overflow-y: auto;
+        }
+
+        .question-number {
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: var(--accent);
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .question-text {
+            font-size: 20px;
+            font-weight: 700;
+            color: white;
+            line-height: 1.5;
+            margin-bottom: 28px;
+        }
+
+        .difficulty-badge {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 50px;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
+        .diff-Easy {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .diff-Medium {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        .diff-Hard {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .options-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .option-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border: 2px solid rgba(255, 255, 255, 0.12);
+            border-radius: 14px;
+            padding: 18px 22px;
+            text-align: left;
+            cursor: pointer;
+            font-size: 15px;
+            color: #ddd;
+            font-family: 'Outfit', sans-serif;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            border-color: var(--accent);
+            background: rgba(92, 84, 112, 0.3);
+            color: white;
+        }
+
+        .option-btn.selected {
+            border-color: #a78bfa;
+            background: rgba(92, 84, 112, 0.7);
+            color: white;
+            box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.35);
+            transform: translateX(4px);
+        }
+
+        .option-btn.correct {
+            border-color: #4CAF50;
+            background: rgba(76, 175, 80, 0.2);
+            color: #a5d6a7;
+        }
+
+        .option-btn.wrong {
+            border-color: #ef5350;
+            background: rgba(239, 83, 80, 0.2);
+            color: #ef9a9a;
+        }
+
+        .option-letter {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            font-weight: 700;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .selected .option-letter {
+            background: var(--accent);
+        }
+
+        .nav-btns {
+            margin-top: 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* ── Anti‑cheat overlay ── */
+        #warningOverlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.92);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            text-align: center;
+            padding: 30px;
+        }
+
+        #warningOverlay.show {
+            display: flex;
+        }
+
+        /* ── Result Screen ── */
+        #resultScreen {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: var(--dark);
+            padding: 24px;
+        }
+
+        .result-card {
+            background: var(--mid);
+            border-radius: 20px;
+            padding: 44px 40px;
+            max-width: 560px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .score-circle {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: conic-gradient(var(--accent) var(--pct), rgba(255, 255, 255, 0.1) 0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 800;
+            color: white;
+            margin: 0 auto 24px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ══════════════  INTRO SCREEN  ══════════════ -->
+    <div id="introScreen">
+        <div class="intro-card">
+            <img src="logo.png" class="logo-img" alt="VidhyaSetu"
+                style="width:70px;height:70px;margin:0 auto;display:block;" />
+            <h1>🧪 Skill Verification Test</h1>
+            <p id="introSubjectLine">Subject: <strong id="introSubject">—</strong> &nbsp;|&nbsp; 15 Questions
+                &nbsp;|&nbsp; Per-question timer</p>
+            <ul class="rules-list">
+                <li><span>📋</span> 15 MCQ questions. Each correct answer = 1 point.</li>
+                <li><span>⏱</span> Total time: 20 minutes. Auto-submits when time runs out.</li>
+                <li><span>🖥</span> Test runs in Full-Screen Mode only. Exiting causes auto-submit.</li>
+                <li><span>🚫</span> Switching tabs / windows is detected and recorded.</li>
+                <li><span>🖱</span> Right-click, copy, and keyboard shortcuts are disabled.</li>
+                <li><span>⚠️</span> 3 tab-switch warnings → test auto-submits.</li>
+            </ul>
+            <div
+                style="background: rgba(255,204,0,0.12); border: 1px solid #FFCC02; border-radius: 12px; padding: 14px 18px; margin-bottom: 10px; font-size: 13px; color: #FFCC02; text-align:left;">
+                ⚠️ <strong>Skill Levels &amp; Fees:</strong><br />
+                50–75% → Basic (₹150/hr) &nbsp;|&nbsp; 76–90% → Intermediate (₹200/hr) &nbsp;|&nbsp; 91–100% → Advanced
+                (₹250/hr)
+            </div>
+            <div
+                style="background: rgba(100,200,255,0.08); border: 1px solid rgba(100,200,255,0.3); border-radius: 12px; padding: 14px 18px; margin-bottom: 24px; font-size: 13px; color: #90caf9; text-align:left;">
+                ⏱️ <strong>Per-Question Timer:</strong> Easy = 20 sec &nbsp;|&nbsp; Medium = 30 sec &nbsp;|&nbsp; Hard =
+                45 sec
+            </div>
+            <button class="btn-3d btn-primary btn-block" style="padding:16px;font-size:16px;" id="startBtn"
+                onclick="startTest()">🚀 Start Test in Full-Screen</button>
+            <div style="margin-top:16px;"><a href="dashboard.html" style="color:#888;font-size:13px;">← Back to
+                    Dashboard</a></div>
+        </div>
+    </div>
+
+    <!-- ══════════════  ANTI-CHEAT WARNING OVERLAY  ══════════════ -->
+    <div id="warningOverlay">
+        <div style="font-size:64px;margin-bottom:20px;">⚠️</div>
+        <h2 style="color:#FFD700;font-size:26px;font-weight:800;margin-bottom:14px;">Warning!</h2>
+        <p style="color:#ccc;font-size:16px;max-width:400px;" id="warningMsg">Tab switching detected. Please stay on
+            this tab.</p>
+        <p style="color:#ef9a9a;font-size:14px;margin:14px 0;" id="warningCount">Warning 1 of 3</p>
+        <button class="btn-3d btn-primary" style="padding:12px 28px;margin-top:10px;" onclick="dismissWarning()">I
+            Understand – Resume Test</button>
+    </div>
+
+    <!-- ══════════════  TEST SCREEN  ══════════════ -->
+    <div id="testScreen">
+        <div class="test-header">
+            <div>
+                <img src="logo.png" class="logo-img" alt="VidhyaSetu"
+                    style="width:36px;height:36px;display:inline-block;vertical-align:middle;margin-right:10px;" />
+                <span class="test-subject" id="headerSubject">—</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
+                <div class="test-progress">
+                    <div style="color:#aaa;font-size:12px;margin-bottom:4px;">Q<span id="qNum">1</span> of <span
+                            id="qTotal">15</span></div>
+                    <div class="progress-bar-wrap">
+                        <div class="progress-bar-fill" id="progressFill" style="width:6.67%"></div>
+                    </div>
+                </div>
+                <div class="timer-box" id="timerDisplay">20:00</div>
+                <button class="btn-3d btn-danger btn-sm" onclick="confirmSubmit()">Submit 🚩</button>
+            </div>
+        </div>
+
+        <div class="test-body">
+            <div class="question-number" id="qLabel">QUESTION 1</div>
+            <div class="question-text" id="qText">Loading…</div>
+            <div class="options-grid" id="optionsGrid"></div>
+            <div class="nav-btns">
+                <button class="btn-3d btn-secondary" id="prevBtn" onclick="prevQ()" disabled>← Previous</button>
+                <div style="display:flex;gap:6px;" id="dotNav"></div>
+                <button class="btn-3d btn-primary" id="nextBtn" onclick="nextQ()">Next →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════  RESULT SCREEN  ══════════════ -->
+    <div id="resultScreen">
+        <div class="result-card">
+            <div class="score-circle" id="scoreCircle">—</div>
+            <h1 id="resultTitle" style="font-size:26px;font-weight:800;color:white;margin-bottom:8px;">Test Complete!
+            </h1>
+            <div class="badge" id="levelBadge"
+                style="font-size:16px;padding:10px 24px;margin-bottom:20px;display:inline-block;"></div>
+            <p style="color:#aaa;font-size:15px;line-height:1.7;" id="resultMsg"></p>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:24px 0;">
+                <div style="background:rgba(255,255,255,0.06);border-radius:12px;padding:16px;">
+                    <h3 id="correctCount" style="font-size:24px;font-weight:800;color:#4CAF50;margin-bottom:4px;">—</h3>
+                    <p style="font-size:12px;color:#aaa;">Correct</p>
+                </div>
+                <div style="background:rgba(255,255,255,0.06);border-radius:12px;padding:16px;">
+                    <h3 id="wrongCount" style="font-size:24px;font-weight:800;color:#ef5350;margin-bottom:4px;">—</h3>
+                    <p style="font-size:12px;color:#aaa;">Incorrect</p>
+                </div>
+                <div style="background:rgba(255,255,255,0.06);border-radius:12px;padding:16px;">
+                    <h3 id="skipCount" style="font-size:24px;font-weight:800;color:#aaa;margin-bottom:4px;">—</h3>
+                    <p style="font-size:12px;color:#aaa;">Skipped</p>
+                </div>
+            </div>
+            <a href="T_dashboard.html" class="btn-3d btn-primary btn-block" style="padding:14px;font-size:15px;"
+                id="resultBtn">Go to Dashboard 🏠</a>
+        </div>
+    </div>
+
+    <!-- Firebase -->
+    
+    <script src="js/auth.js"></script>
+    <script>
+
+        // ═══════════════ QUESTION BANK ═══════════════
+        const QUESTION_BANK = {
+            'Java': [
+                { id: 1, question: 'What is the correct way to declare a variable in Java?', options: ['var x = 10;', 'int x = 10;', 'variable x = 10;', 'num x = 10;'], correctAnswer: 1, difficulty: 'Easy' },
+                { id: 2, question: 'Which of the following is NOT a primitive data type in Java?', options: ['int', 'String', 'boolean', 'double'], correctAnswer: 1, difficulty: 'Easy' },
+                { id: 3, question: 'What does JVM stand for?', options: ['Java Virtual Machine', 'Java Verified Method', 'Just-in-time Virtual Memory', 'Java Visual Manager'], correctAnswer: 0, difficulty: 'Easy' },
+                { id: 4, question: 'Which keyword is used to inherit a class in Java?', options: ['super', 'this', 'extends', 'implements'], correctAnswer: 2, difficulty: 'Easy' },
+                { id: 5, question: 'What is the default value of a boolean in Java?', options: ['true', 'false', '0', 'null'], correctAnswer: 1, difficulty: 'Easy' },
+                { id: 6, question: 'Which collection allows duplicate elements but maintains insertion order?', options: ['Set', 'Map', 'List', 'Queue'], correctAnswer: 2, difficulty: 'Medium' },
+                { id: 7, question: 'What is the output of: System.out.println(10 + 20 + "Java");', options: ['"102Java"', '30Java', '1020Java', 'Error'], correctAnswer: 1, difficulty: 'Medium' },
+                { id: 8, question: 'Which access modifier makes a member accessible only within its class?', options: ['public', 'protected', 'default', 'private'], correctAnswer: 3, difficulty: 'Medium' },
+                { id: 9, question: 'What is autoboxing in Java?', options: ['Auto widening of integers', 'Converting primitive to Wrapper class automatically', 'Converting String to int', 'None of the above'], correctAnswer: 1, difficulty: 'Medium' },
+                { id: 10, question: 'Which interface should a class implement to be sorted using Collections.sort()?', options: ['Serializable', 'Cloneable', 'Comparable', 'Runnable'], correctAnswer: 2, difficulty: 'Medium' },
+                { id: 11, question: 'What is the time complexity of accessing an element by index in ArrayList?', options: ['O(n)', 'O(log n)', 'O(1)', 'O(n²)'], correctAnswer: 2, difficulty: 'Hard' },
+                { id: 12, question: 'What is the difference between == and equals() in Java?', options: ['No difference', '== compares references; equals() compares content', '== compares content; equals() compares references', 'Both compare content'], correctAnswer: 1, difficulty: 'Hard' },
+                { id: 13, question: 'Which design pattern is implemented by Java\'s Iterator?', options: ['Factory', 'Observer', 'Strategy', 'Iterator'], correctAnswer: 3, difficulty: 'Hard' },
+                { id: 14, question: 'What is the purpose of the volatile keyword in Java?', options: ['Makes a variable constant', 'Ensures visibility of changes across threads', 'Prevents method overriding', 'None'], correctAnswer: 1, difficulty: 'Hard' },
+                { id: 15, question: 'Which concept allows one interface to be implemented by multiple unrelated classes?', options: ['Inheritance', 'Polymorphism', 'Abstraction', 'Encapsulation'], correctAnswer: 1, difficulty: 'Hard' },
+            ],
+            'C-Language': [
+                { id: 1, question: 'What is the correct way to declare an integer in C?', options: ['integer x;', 'int x;', 'x int;', 'num x;'], correctAnswer: 1, difficulty: 'Easy' },
+                { id: 2, question: 'Which operator is used to get the address of a variable in C?', options: ['*', '&', '->', '#'], correctAnswer: 1, difficulty: 'Easy' },
+                { id: 3, question: 'What does printf("%d", 5/2); output?', options: ['2', '2.5', '2.0', 'Error'], correctAnswer: 0, difficulty: 'Easy' },
+                { id: 4, question: 'Which header file is required for printf and scanf?', options: ['stdlib.h', 'math.h', 'stdio.h', 'string.h'], correctAnswer: 2, difficulty: 'Easy' },
+                { id: 5, question: 'What is the size of int on a 32-bit system?', options: ['1 byte', '2 bytes', '4 bytes', '8 bytes'], correctAnswer: 2, difficulty: 'Easy' },
+                { id: 6, question: 'What does the * operator do when used with a pointer?', options: ['Gets address', 'Dereferences pointer', 'Multiplies values', 'Returns size'], correctAnswer: 1, difficulty: 'Medium' },
+                { id: 7, question: 'What is a dangling pointer?', options: ['Null pointer', 'Pointer to freed memory', 'Pointer to stack', 'Wild pointer'], correctAnswer: 1, difficulty: 'Medium' },
+                { id: 8, question: 'Which storage class preserves variable value between function calls?', options: ['auto', 'extern', 'static', 'register'], correctAnswer: 2, difficulty: 'Medium' },
+                { id: 9, question: 'What is the output of: int a=5; printf("%d", a++);?', options: ['5', '6', '4', 'Error'], correctAnswer: 0, difficulty: 'Medium' },
+                { id: 10, question: 'Which function is used to dynamically allocate memory in C?', options: ['new', 'malloc', 'alloc', 'create'], correctAnswer: 1, difficulty: 'Medium' },
+                { id: 11, question: 'What is a void pointer?', options: ['A null pointer', 'A pointer with no type', 'A pointer to void function', 'An invalid pointer'], correctAnswer: 1, difficulty: 'Hard' },
+                { id: 12, question: 'What will happen if you access array out-of-bounds in C?', options: ['Compile error', 'Segmentation fault (runtime)', 'Returns 0', 'Returns garbage'], correctAnswer: 1, difficulty: 'Hard' },
+                { id: 13, question: 'What does the restrict qualifier do in C99?', options: ['Makes variable constant', 'Hints pointer has unique access', 'Restricts scope', 'Prevents modification'], correctAnswer: 1, difficulty: 'Hard' },
+                { id: 14, question: 'What is the difference between struct and union?', options: ['No difference', 'struct allocates max member size; union shares memory', 'union allocates all members; struct shares', 'Both are same in C'], correctAnswer: 1, difficulty: 'Hard' },
+                { id: 15, question: 'What is a function pointer in C?', options: ['Pointer to return value', 'Pointer that stores function address', 'A static function', 'An inline function'], correctAnswer: 1, difficulty: 'Hard' },
+            ],
+            'FullStackDevelopment': [
+                { id: 1, question: 'What does HTML stand for?', options: ['HyperText Markup Language', 'HighText Machine Language', 'HyperText Machine Language', 'None'], correctAnswer: 0, difficulty: 'Easy' },
+                { id: 2, question: 'Which CSS property is used to change text color?', options: ['font-color', 'color', 'text-color', 'foreground'], correctAnswer: 1, difficulty: 'Easy' },
+                { id: 3, question: 'What does RESTful API stand for?', options: ['Representational State Transfer', 'Remote State Transfer', 'Reliable State Transfer', 'None'], correctAnswer: 0, difficulty: 'Easy' },
+                { id: 4, question: 'Which protocol is used for secure web communication?', options: ['HTTP', 'FTP', 'HTTPS', 'SMTP'], correctAnswer: 2, difficulty: 'Easy' },
+                { id: 5, question: 'What does SQL stand for?', options: ['Structured Query Language', 'Simple Query Language', 'Standard Query Logic', 'None'], correctAnswer: 0, difficulty: 'Easy' },
+                { id: 6, question: 'What is the purpose of Node.js?', options: ['Browser rendering', 'Server-side JavaScript runtime', 'Database management', 'CSS preprocessing'], correctAnswer: 1, difficulty: 'Medium' },
+                { id: 7, question: 'What is a React component?', options: ['A database table', 'Reusable piece of UI', 'A routing mechanism', 'A server process'], correctAnswer: 1, difficulty: 'Medium' },
+                { id: 8, question: 'What HTTP method is used to CREATE a new resource?', options: ['GET', 'PUT', 'POST', 'DELETE'], correctAnswer: 2, difficulty: 'Medium' },
+                { id: 9, question: 'What is JWT used for?', options: ['Styling', 'Authentication and information exchange', 'Database queries', 'Server-side rendering'], correctAnswer: 1, difficulty: 'Medium' },
+                { id: 10, question: 'What is CORS?', options: ['Cross-Origin Resource Sharing', 'Client-Oriented Rendering System', 'Cross-Object Reference Standard', 'None'], correctAnswer: 0, difficulty: 'Medium' },
+                { id: 11, question: 'Which NoSQL database uses documents?', options: ['MySQL', 'PostgreSQL', 'MongoDB', 'SQLite'], correctAnswer: 2, difficulty: 'Hard' },
+                { id: 12, question: 'What is the difference between localStorage and sessionStorage?', options: ['No difference', 'localStorage persists; sessionStorage cleared on tab close', 'sessionStorage persists; localStorage cleared on tab close', 'Both persist forever'], correctAnswer: 1, difficulty: 'Hard' },
+                { id: 13, question: 'What is the purpose of Docker in full-stack development?', options: ['UI framework', 'Containerization for consistent environments', 'Database ORM', 'CSS preprocessor'], correctAnswer: 1, difficulty: 'Hard' },
+                { id: 14, question: 'What does "async/await" solve in JavaScript?', options: ['Memory management', 'Callback hell and asynchronous code readability', 'DOM manipulation', 'Routing'], correctAnswer: 1, difficulty: 'Hard' },
+                { id: 15, question: 'What is the CAP theorem in distributed systems?', options: ['Consistency, Availability, Partition Tolerance', 'Concurrency, Atomicity, Performance', 'Caching, API, Protocol', 'None of the above'], correctAnswer: 0, difficulty: 'Hard' },
+            ],
+            'Data Structures': [
+                { id: 1, question: 'What is the time complexity of accessing an element in an array?', options: ['O(n)', 'O(log n)', 'O(1)', 'O(n²)'], correctAnswer: 2, difficulty: 'Easy' },
+                { id: 2, question: 'Which data structure follows LIFO (Last In, First Out)?', options: ['Queue', 'Stack', 'Tree', 'Graph'], correctAnswer: 1, difficulty: 'Easy' },
+                { id: 3, question: 'What is a linked list?', options: ['Array with index', 'Sequence of nodes connected by pointers', 'A tree structure', 'A hash table'], correctAnswer: 1, difficulty: 'Easy' },
+                { id: 4, question: 'What is the best-case time complexity of bubble sort?', options: ['O(n²)', 'O(n log n)', 'O(n)', 'O(1)'], correctAnswer: 2, difficulty: 'Easy' },
+                { id: 5, question: 'Which data structure is used for BFS traversal?', options: ['Stack', 'Queue', 'Tree', 'Array'], correctAnswer: 1, difficulty: 'Easy' },
+                { id: 6, question: 'What is a binary search tree (BST)?', options: ['Tree where left child > root', 'Tree where left child < root < right child', 'Balanced binary tree', 'Tree with two root nodes'], correctAnswer: 1, difficulty: 'Medium' },
+                { id: 7, question: 'What is the time complexity of searching in a balanced BST?', options: ['O(n)', 'O(1)', 'O(log n)', 'O(n log n)'], correctAnswer: 2, difficulty: 'Medium' },
+                { id: 8, question: 'What is a heap?', options: ['Complete binary tree with heap property', 'A linked list', 'A graph type', 'A hash map'], correctAnswer: 0, difficulty: 'Medium' },
+                { id: 9, question: 'What is the worst-case time complexity of quicksort?', options: ['O(n log n)', 'O(n)', 'O(n²)', 'O(log n)'], correctAnswer: 2, difficulty: 'Medium' },
+                { id: 10, question: 'Which technique is used in Dynamic Programming?', options: ['Greedy approach', 'Memoization and optimal substructure', 'Divide and conquer only', 'Backtracking'], correctAnswer: 1, difficulty: 'Medium' },
+                { id: 11, question: 'What is the space complexity of merge sort?', options: ['O(1)', 'O(log n)', 'O(n)', 'O(n²)'], correctAnswer: 2, difficulty: 'Hard' },
+                { id: 12, question: 'What is an AVL tree?', options: ['A tree with 2 nodes', 'Self-balancing BST where height diff ≤ 1', 'Complete binary tree', 'B-tree variant'], correctAnswer: 1, difficulty: 'Hard' },
+                { id: 13, question: 'What is Dijkstra\'s algorithm used for?', options: ['Minimum spanning tree', 'Shortest path in weighted graph', 'Topological sort', 'Cycle detection'], correctAnswer: 1, difficulty: 'Hard' },
+                { id: 14, question: 'What is the time complexity of inserting into a hash table (average case)?', options: ['O(log n)', 'O(n)', 'O(1)', 'O(n log n)'], correctAnswer: 2, difficulty: 'Hard' },
+                { id: 15, question: 'What is a trie used for?', options: ['Graph traversal', 'Efficient string search and prefix matching', 'Heap operations', 'Priority queues'], correctAnswer: 1, difficulty: 'Hard' },
+            ],
+            'ComputerNetworks': [
+                { id: 1, question: 'What does IP stand for?', options: ['Internet Protocol', 'Internal Process', 'Internet Port', 'Interface Protocol'], correctAnswer: 0, difficulty: 'Easy' },
+                { id: 2, question: 'Which layer of OSI model handles routing?', options: ['Data Link', 'Network', 'Transport', 'Application'], correctAnswer: 1, difficulty: 'Easy' },
+                { id: 3, question: 'What is the default port for HTTP?', options: ['21', '22', '80', '443'], correctAnswer: 2, difficulty: 'Easy' },
+                { id: 4, question: 'What does DNS stand for?', options: ['Domain Name System', 'Data Network Service', 'Domain Network Server', 'None'], correctAnswer: 0, difficulty: 'Easy' },
+                { id: 5, question: 'What is the maximum size of an IPv4 address in bits?', options: ['16', '32', '64', '128'], correctAnswer: 1, difficulty: 'Easy' },
+                { id: 6, question: 'What is the purpose of ARP?', options: ['Resolve IP to MAC address', 'Assign IP addresses', 'Encrypt data', 'Route packets'], correctAnswer: 0, difficulty: 'Medium' },
+                { id: 7, question: 'What is the difference between TCP and UDP?', options: ['No difference', 'TCP is reliable connection-oriented; UDP is connectionless', 'UDP is reliable; TCP is not', 'Both are identical'], correctAnswer: 1, difficulty: 'Medium' },
+                { id: 8, question: 'What is subnetting?', options: ['Connecting two networks', 'Dividing a network into smaller sub-networks', 'Routing between networks', 'Network encryption'], correctAnswer: 1, difficulty: 'Medium' },
+                { id: 9, question: 'What is the purpose of DHCP?', options: ['Domain resolution', 'Automatically assign IP addresses', 'Encrypt packets', 'Route data'], correctAnswer: 1, difficulty: 'Medium' },
+                { id: 10, question: 'What is a firewall?', options: ['Antivirus software', 'Network security device that monitors traffic', 'A router type', 'Physical barrier'], correctAnswer: 1, difficulty: 'Medium' },
+                { id: 11, question: 'What does BGP stand for and what is it used for?', options: ['Basic Gateway Protocol for LAN', 'Border Gateway Protocol for inter-AS routing', 'Broad Gateway Protocol', 'None'], correctAnswer: 1, difficulty: 'Hard' },
+                { id: 12, question: 'What is SSL/TLS?', options: ['A routing protocol', 'A security protocol for encrypted communication', 'A compression protocol', 'A network topology'], correctAnswer: 1, difficulty: 'Hard' },
+                { id: 13, question: 'What is VLAN?', options: ['Virtual Local Area Network', 'Virtual LAN protocol', 'Very Large Area Network', 'None'], correctAnswer: 0, difficulty: 'Hard' },
+                { id: 14, question: 'What does NAT do in networking?', options: ['Name resolution', 'Translates private IPs to public IPs', 'Assigns MAC addresses', 'Encrypts packets'], correctAnswer: 1, difficulty: 'Hard' },
+                { id: 15, question: 'What is the purpose of OSPF?', options: ['Link-state routing protocol within an AS', 'Path-vector routing between AS', 'MAC addressing', 'DNS resolution'], correctAnswer: 0, difficulty: 'Hard' },
+            ],
+            'Operating System': [
+                { id: 1, question: 'What is an operating system?', options: ['Application software', 'Software that manages hardware and software resources', 'Network protocol', 'Programming language'], correctAnswer: 1, difficulty: 'Easy' },
+                { id: 2, question: 'What is a process?', options: ['A program on disk', 'An executing instance of a program', 'A thread', 'An OS kernel'], correctAnswer: 1, difficulty: 'Easy' },
+                { id: 3, question: 'What is virtual memory?', options: ['RAM', 'Extra disk space as memory extension', 'Cache memory', 'ROM'], correctAnswer: 1, difficulty: 'Easy' },
+                { id: 4, question: 'Which scheduling algorithm gives priority to the shortest job?', options: ['FCFS', 'SJF', 'Round Robin', 'Priority Scheduling'], correctAnswer: 1, difficulty: 'Easy' },
+                { id: 5, question: 'What is a deadlock?', options: ['Infinite loop', 'Situation where processes wait for each other forever', 'Memory overflow', 'Process starvation'], correctAnswer: 1, difficulty: 'Easy' },
+                { id: 6, question: 'What is the difference between a process and a thread?', options: ['No difference', 'A thread is lightweight, shares process memory; process has its own memory', 'Process is faster', 'Thread uses more memory'], correctAnswer: 1, difficulty: 'Medium' },
+                { id: 7, question: 'What is paging in OS?', options: ['Swapping processes', 'Memory management that divides memory into fixed-size frames', 'File system method', 'I/O management'], correctAnswer: 1, difficulty: 'Medium' },
+                { id: 8, question: 'What is a semaphore?', options: ['Hardware interrupt', 'Synchronization mechanism for managing concurrent access', 'Process scheduler', 'Memory allocator'], correctAnswer: 1, difficulty: 'Medium' },
+                { id: 9, question: 'What is thrashing in OS?', options: ['CPU overheating', 'Excessive paging causing performance degradation', 'Disk failure', 'Memory overflow'], correctAnswer: 1, difficulty: 'Medium' },
+                { id: 10, question: 'What is the purpose of the PCB (Process Control Block)?', options: ['Stores process state and information', 'Controls power consumption', 'Manages network packets', 'None'], correctAnswer: 0, difficulty: 'Medium' },
+                { id: 11, question: 'What is the banker\'s algorithm used for?', options: ['Process scheduling', 'Deadlock avoidance', 'Memory allocation', 'I/O management'], correctAnswer: 1, difficulty: 'Hard' },
+                { id: 12, question: 'What is the difference between internal and external fragmentation?', options: ['No difference', 'Internal: wasted space inside allocated block; External: wasted space outside allocated blocks', 'External: inside; Internal: outside', 'Both same'], correctAnswer: 1, difficulty: 'Hard' },
+                { id: 13, question: 'What is demand paging?', options: ['Loading all pages at start', 'Loading pages only when referenced', 'Random page loading', 'OS scheduling technique'], correctAnswer: 1, difficulty: 'Hard' },
+                { id: 14, question: 'What is the purpose of the TLB (Translation Lookaside Buffer)?', options: ['Cache for page table entries to speed up virtual-to-physical translation', 'RAM cache', 'CPU register', 'Network buffer'], correctAnswer: 0, difficulty: 'Hard' },
+                { id: 15, question: 'What is a zombie process?', options: ['Malware process', 'Process that has finished but entry remains in process table', 'Infinite loop process', 'High-priority process'], correctAnswer: 1, difficulty: 'Hard' },
+            ],
+        };
+
+        // ═══════════════ STATE ═══════════════
+        let subject = '', questions = [], answers = [], currentQ = 0;
+        let timerInterval = null, questionTimeLeft = 0;
+        let warnings = 0, testStarted = false, testSubmitted = false;
+
+        // Per-question time limits
+        const Q_TIME = { Easy: 20, Medium: 30, Hard: 45 };
+        let currentUser = null;
+
+        // ═══════════════ INIT ═══════════════
+        // ── Init – Auth Guard ──
+        function closeTest() {
+            if (testActive) {
+                if (!confirm("Are you sure? Your progress will be lost.")) return;
+            }
+            window.location.href = 'T_dashboard.html';
+        }
+        (async () => {
+            const data = getCurrentUser();
+            if (!data || data.role !== 'tutor') {
+                window.location.href = 'tutor-login.html';
+                return;
+            }
+            currentUser = data;
+
+            // Get subject from session storage or user data
+            subject = sessionStorage.getItem('vs_primary_subject') || data.primarySubject || (Array.isArray(data.subjects) ? data.subjects[0] : (data.subjects ? JSON.parse(data.subjects)[0] : 'Java'));
+            questions = (QUESTION_BANK[subject] || QUESTION_BANK['Java']).slice(0, 15);
+            answers = new Array(questions.length).fill(-1);
+            document.getElementById('introSubject').textContent = subject;
+            document.getElementById('introSubjectLine').innerHTML = `Subject: <strong>${subject}</strong> &nbsp;|&nbsp; ${questions.length} Questions &nbsp;|&nbsp; 20 Minutes`;
+        })();
+
+        // ═══════════════ START TEST ═══════════════
+        function startTest() {
+            const el = document.getElementById('testScreen');
+            el.style.display = 'flex';
+            el.style.flexDirection = 'column';
+            document.getElementById('introScreen').style.display = 'none';
+            document.getElementById('headerSubject').textContent = subject + ' – Skill Test';
+            document.getElementById('qTotal').textContent = questions.length;
+            testStarted = true;
+
+            // Request fullscreen
+            document.documentElement.requestFullscreen().catch(() => { });
+            buildDots();
+            setupAntiCheat();
+            renderQuestion(); // renderQuestion calls restartQuestionTimer
+        }
+
+        // ═══════════════ PER-QUESTION TIMER ═══════════════
+        function restartQuestionTimer() {
+            clearInterval(timerInterval);
+            const q = questions[currentQ];
+            questionTimeLeft = Q_TIME[q.difficulty] || 30;
+            updateTimerDisplay();
+
+            timerInterval = setInterval(() => {
+                questionTimeLeft--;
+                updateTimerDisplay();
+                if (questionTimeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    // Auto-advance or auto-submit
+                    if (currentQ < questions.length - 1) {
+                        currentQ++;
+                        renderQuestion();
+                    } else {
+                        submitTest('Time expired on last question');
+                    }
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const timerEl = document.getElementById('timerDisplay');
+            timerEl.textContent = questionTimeLeft + 's';
+            timerEl.className = 'timer-box' +
+                (questionTimeLeft <= 5 ? ' danger' : questionTimeLeft <= 10 ? ' warning' : '');
+        }
+
+        // ═══════════════ RENDER QUESTION ═══════════════
+        const LETTERS = ['A', 'B', 'C', 'D'];
+        function renderQuestion() {
+            const q = questions[currentQ];
+            document.getElementById('qLabel').textContent = `QUESTION ${currentQ + 1} / ${questions.length}`;
+            document.getElementById('qNum').textContent = currentQ + 1;
+            document.getElementById('qText').innerHTML = q.question + ` <span class="difficulty-badge diff-${q.difficulty}">${q.difficulty}</span>`;
+            document.getElementById('progressFill').style.width = `${((currentQ + 1) / questions.length) * 100}%`;
+
+            const grid = document.getElementById('optionsGrid');
+            grid.innerHTML = q.options.map((opt, i) => `
+        <button class="option-btn ${answers[currentQ] === i ? 'selected' : ''}"
+            onclick="selectOption(${i})" id="opt_${i}">
+            <span class="option-letter">${LETTERS[i]}</span> ${opt}
+        </button>`).join('');
+
+            document.getElementById('prevBtn').disabled = currentQ === 0;
+            document.getElementById('nextBtn').textContent = currentQ === questions.length - 1 ? '🚩 Submit' : 'Next →';
+            document.getElementById('nextBtn').onclick = currentQ === questions.length - 1 ? confirmSubmit : nextQ;
+            updateDots();
+
+            // Restart per-question timer (only during active test)
+            if (testStarted) restartQuestionTimer();
+        }
+
+        function selectOption(idx) {
+            answers[currentQ] = idx;
+            document.querySelectorAll('.option-btn').forEach((b, i) => {
+                b.classList.toggle('selected', i === idx);
+                const letter = b.querySelector('.option-letter');
+                letter.style.background = i === idx ? 'var(--accent)' : 'rgba(255,255,255,0.1)';
+                letter.style.color = i === idx ? 'white' : '';
+                letter.style.fontWeight = i === idx ? '800' : '700';
+            });
+            updateDots();
+        }
+
+        function prevQ() { if (currentQ > 0) { currentQ--; renderQuestion(); } }
+        function nextQ() { if (currentQ < questions.length - 1) { currentQ++; renderQuestion(); } }
+
+        function buildDots() {
+            document.getElementById('dotNav').innerHTML = questions.map((_, i) =>
+                `<div id="dot_${i}" onclick="goToQ(${i})" style="width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.2);cursor:pointer;transition:0.2s;" title="Q${i + 1}"></div>`).join('');
+        }
+        function goToQ(i) { currentQ = i; renderQuestion(); }
+        function updateDots() {
+            questions.forEach((_, i) => {
+                const dot = document.getElementById(`dot_${i}`);
+                if (!dot) return;
+                dot.style.background = i === currentQ ? 'var(--accent)' : answers[i] !== -1 ? '#4CAF50' : 'rgba(255,255,255,0.2)';
+                dot.style.transform = i === currentQ ? 'scale(1.4)' : 'scale(1)';
+            });
+        }
+
+        // ═══════════════ ANTI-CHEAT ═══════════════
+        function setupAntiCheat() {
+            // Tab visibility
+            document.addEventListener('visibilitychange', () => {
+                if (testStarted && !testSubmitted && document.hidden) triggerWarning('Tab switching detected!');
+            });
+            // Fullscreen exit
+            document.addEventListener('fullscreenchange', () => {
+                if (testStarted && !testSubmitted && !document.fullscreenElement) triggerWarning('Full-screen mode exited!');
+            });
+            // Right-click
+            document.addEventListener('contextmenu', e => { if (testStarted) e.preventDefault(); });
+            // Copy/paste shortcuts
+            document.addEventListener('keydown', e => {
+                if (!testStarted) return;
+                if ((e.ctrlKey || e.metaKey) && ['c', 'v', 'x', 'a', 'u'].includes(e.key.toLowerCase())) e.preventDefault();
+                if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) e.preventDefault();
+            });
+            // Window blur
+            window.addEventListener('blur', () => {
+                if (testStarted && !testSubmitted) triggerWarning('Window focus lost!');
+            });
+        }
+
+        function triggerWarning(msg) {
+            warnings++;
+            if (warnings >= 3) { submitTest('Cheating detected – 3 warnings'); return; }
+            document.getElementById('warningMsg').textContent = '⚠️ ' + msg + ' Stay on this page.';
+            document.getElementById('warningCount').textContent = `Warning ${warnings} of 3 – 1 more and test auto-submits!`;
+            document.getElementById('warningOverlay').classList.add('show');
+        }
+
+        function dismissWarning() {
+            document.getElementById('warningOverlay').classList.remove('show');
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => { });
+        }
+
+        function confirmSubmit() {
+            if (!confirm(`You have answered ${answers.filter(a => a !== -1).length} of ${questions.length} questions. Submit the test?`)) return;
+            submitTest('Manual submit');
+        }
+
+        // ═══════════════ SUBMIT & SCORE ═══════════════
+        async function submitTest(reason) {
+            if (testSubmitted) return;
+            testSubmitted = true;
+            clearInterval(timerInterval);
+            if (document.fullscreenElement) document.exitFullscreen().catch(() => { });
+
+            const correct = questions.filter((q, i) => answers[i] === q.correctAnswer).length;
+            const wrong = questions.filter((q, i) => answers[i] !== -1 && answers[i] !== q.correctAnswer).length;
+            const skipped = questions.filter((q, i) => answers[i] === -1).length;
+            const pct = Math.round((correct / questions.length) * 100);
+
+            // ── Scoring thresholds ──
+            // Advanced : 90–100%  → ₹250/hr
+            // Intermediate : 76–90% → ₹200/hr
+            // Basic : 50–75%      → ₹150/hr
+            // Fail : < 50%
+            const passed = pct >= 50;
+            const level = pct >= 90 ? 'Advanced' : pct >= 76 ? 'Intermediate' : 'Basic';
+            const fee = pct >= 90 ? 250 : pct >= 76 ? 200 : 150;
+
+            // ── Save to DB ──
+            if (currentUser) {
+                try {
+                    const token = localStorage.getItem('vs_token') || '';
+                    const res = await fetch('api/save_result.php', {
+                        method: 'POST',
+                        headers: authHeader(),
+                        body: JSON.stringify({ passed, score: pct, level, fee, subject })
+                    });
+                    const text = await res.text();
+                    let json;
+                    try {
+                        json = JSON.parse(text);
+                    } catch (e) {
+                        console.error('JSON Parse Error. Server returned:', text);
+                        throw new Error('Server returned invalid data format. Check PHP logs.');
+                    }
+                    if (json.success && json.userData) {
+                        // Update local cache
+                        localStorage.setItem('vs_userdata', JSON.stringify(json.userData));
+                        showToast('Results saved successfully!', 'success');
+                    } else {
+                        showToast(json.message || 'Error saving results. Your progress may not be stored.', 'error');
+                        alert('⚠️ Warning: Could not save test results to the database. Reason: ' + (json.message || 'Unknown error'));
+                    }
+                } catch (err) {
+                    console.warn('DB save error:', err);
+                    showToast('Connection error. Failed to save results.', 'error');
+                    alert('⚠️ Critical: Could not connect to the server (or server crashed) to save your test results. Please check your connection and refresh.');
+                }
+            }
+
+            // ── Show result ──
+            document.getElementById('testScreen').style.display = 'none';
+            const rs = document.getElementById('resultScreen');
+            rs.style.display = 'flex';
+
+            const angle = `${pct * 3.6}deg`;
+            document.getElementById('scoreCircle').style.setProperty('--pct', angle);
+            document.getElementById('scoreCircle').textContent = pct + '%';
+
+            const levelMessages = {
+                Advanced: `🎉 Outstanding! You're an Advanced tutor (₹${fee}/hr). Profile is now live!`,
+                Intermediate: `👍 Well done! You're an Intermediate tutor (₹${fee}/hr). Profile is now live!`,
+                Basic: `📈 Good start! You're a Basic tutor (₹${fee}/hr). Profile is now live!`,
+                Fail: '😔 Score below 50%. Profile not activated. Practice and retake the test.'
+            };
+            const msgKey = !passed ? 'Fail' : level;
+
+            const emoji = pct >= 90 ? '🏆' : pct >= 76 ? '🥈' : pct >= 50 ? '🥉' : '📚';
+            document.getElementById('resultTitle').textContent = passed ? `${emoji} ${level} Level` : '📚 Not Passed';
+
+            const lbEl = document.getElementById('levelBadge');
+            if (passed) {
+                lbEl.textContent = `${level} – ${pct}% – ₹${fee}/hr`;
+                lbEl.className = `badge ${pct >= 90 ? 'badge-info' : pct >= 76 ? 'badge-warning' : 'badge-success'}`;
+            } else {
+                lbEl.textContent = `Failed – ${pct}% (need 50%)`;
+                lbEl.className = 'badge badge-danger';
+            }
+            lbEl.style.fontSize = '15px'; lbEl.style.padding = '10px 24px';
+
+            document.getElementById('resultMsg').textContent = levelMessages[msgKey] + ` (Warnings: ${warnings})`;
+            document.getElementById('correctCount').textContent = correct;
+            document.getElementById('wrongCount').textContent = wrong;
+            document.getElementById('skipCount').textContent = skipped;
+            document.getElementById('resultBtn').textContent = !passed ? 'Retake Test 🔄' : 'Go to Dashboard 🏠';
+            document.getElementById('resultBtn').href = !passed ? 'skill-test.html' : 'T_dashboard.html';
+        }
+    </script>
+</body>
+
+</html>

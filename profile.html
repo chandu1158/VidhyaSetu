@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Profile – VidhyaSetu</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="logo.css" />
+    <style>
+        .profile-photo-wrap {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            margin-bottom: 28px;
+        }
+
+        .profile-avatar-large {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+            position: relative;
+            box-shadow: 0 8px 24px rgba(92, 84, 112, 0.35);
+        }
+
+        .profile-avatar-large .edit-photo-btn {
+            position: absolute;
+            bottom: -4px;
+            right: -4px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .subject-tag-removable {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--light);
+            color: var(--accent);
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .subject-tag-removable button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #aaa;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-layout">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <img src="logo.png" class="logo-img" alt="VidhyaSetu" />
+                    <div>
+                        <h3>VidhyaSetu</h3><span>Student Panel</span>
+                    </div>
+                </div>
+            </div>
+            <div class="sidebar-user">
+                <div class="user-avatar" id="avatarInitial">S</div>
+                <div class="user-info">
+                    <h4 id="sidebarName">Student</h4><span>Student</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section-title">Main</div>
+                <a href="dashboard.html"><span class="nav-icon">🏠</span> Dashboard</a>
+                <a href="search.html"><span class="nav-icon">🔍</span> Find a Tutor</a>
+                <a href="bookings.html"><span class="nav-icon">📅</span> My Bookings</a>
+                <div class="nav-section-title">Learning</div>
+                <a href="chat.html"><span class="nav-icon">💬</span> Chat</a>
+                <div class="nav-section-title">Account</div>
+                <a href="profile.html" class="active"><span class="nav-icon">👤</span> My Profile</a>
+                <a href="#" class="logout-link" onclick="logout()"><span class="nav-icon">🚪</span> Logout</a>
+            </nav>
+        </aside>
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+        <main class="main-content">
+            <div class="top-bar">
+                <div style="display:flex;align-items:center;gap:14px;">
+                    <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+                    <h2>My Profile</h2>
+                </div>
+                <div class="top-bar-right">
+                    <a href="search.html" class="notification-btn" title="Find Tutors"
+                        style="text-decoration:none;margin-right:8px;">🔍</a>
+                    <button class="notification-btn">🔔</button>
+                    <div class="user-avatar" style="width:38px;height:38px;font-size:14px;" id="topAvatar">S</div>
+                </div>
+            </div>
+
+            <div class="page-body">
+                <div style="display:grid;grid-template-columns:1fr 2fr;gap:24px;align-items:start;">
+
+                    <!-- Profile Card -->
+                    <div class="card" style="text-align:center;">
+                        <div class="profile-avatar-large" id="bigAvatar" style="margin:0 auto 16px;">S
+                            <button class="edit-photo-btn" title="Change photo">📷</button>
+                        </div>
+                        <h3 id="profileName" style="font-size:20px;font-weight:700;">Loading…</h3>
+                        <p id="profileEmail" style="color:#888;font-size:14px;margin:6px 0;">—</p>
+                        <span class="badge badge-info" style="margin:10px 0 20px;">🎓 Student</span>
+                        <div style="display:flex;flex-direction:column;gap:10px;">
+                            <div style="display:flex;align-items:center;gap:10px;font-size:14px;color:#888;">
+                                <span>📞</span><span id="profilePhone">—</span>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:10px;font-size:14px;color:#888;">
+                                <span>📍</span><span id="profileLocation">—</span>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:10px;font-size:14px;color:#888;">
+                                <span>🚻</span><span id="profileGender">—</span>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:10px;font-size:14px;color:#888;">
+                                <span>🎂</span><span id="profileDOB">—</span>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:10px;font-size:14px;color:#888;">
+                                <span>🏫</span><span id="profileCollege">—</span>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:10px;font-size:14px;color:#888;">
+                                <span>📚</span><span id="profileGrade">—</span>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:10px;font-size:14px;color:#888;">
+                                <span>💻</span><span id="profileMode">—</span>
+                            </div>
+                        </div>
+                        <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--light);">
+                            <p style="font-size:12px;color:#aaa;margin-bottom:8px;">Subjects</p>
+                            <div id="profileSubjectTags"
+                                style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;"></div>
+                        </div>
+                        <button onclick="toggleEditMode()" class="btn-3d btn-primary"
+                            style="margin-top:20px;width:100%;font-size:15px;padding:12px;" id="editBtn">✏️ Edit
+                            Profile</button>
+                    </div>
+
+                    <!-- Edit Form (Initially Hidden) -->
+                    <div class="card" id="editCard" style="display:none;">
+                        <div class="card-header">
+                            <h3>Edit Profile</h3>
+                            <div id="savedMsg"
+                                style="display:none;color:var(--success);font-size:13px;font-weight:600;">✅ Saved!</div>
+                        </div>
+                        <form id="profileForm" onsubmit="saveProfile(event)">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Full Name *</label>
+                                    <input type="text" id="p-name" required placeholder="Your full name" />
+                                </div>
+                                <div class="form-group">
+                                    <label>Phone Number</label>
+                                    <input type="tel" id="p-phone" placeholder="+91 XXXXX XXXXX" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Email Address</label>
+                                <input type="email" id="p-email" disabled style="background:#f0f0f0;color:#888;"
+                                    placeholder="Cannot be changed here" />
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>College / Institution</label>
+                                    <input type="text" id="p-college" placeholder="Your college or school" />
+                                </div>
+                                <div class="form-group">
+                                    <label>City / Location</label>
+                                    <input type="text" id="p-location" placeholder="e.g., Hyderabad" />
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Gender</label>
+                                    <select id="p-gender">
+                                        <option value="">Select Gender</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Date of Birth</label>
+                                    <input type="date" id="p-dob" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Grade / Class</label>
+                                <input type="text" id="p-grade" placeholder="e.g., B.Tech 3rd Year" />
+                            </div>
+                            <div class="form-group">
+                                <label>Preferred Learning Mode</label>
+                                <select id="p-mode">
+                                    <option value="Online">Online</option>
+                                    <option value="Offline">Offline</option>
+                                    <option value="Both">Both Online & Offline</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Subjects of Interest</label>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-item"><input type="checkbox" class="subj-cb" value="Java" />
+                                        Java</label>
+                                    <label class="checkbox-item"><input type="checkbox" class="subj-cb"
+                                            value="C-Language" /> C Language</label>
+                                    <label class="checkbox-item"><input type="checkbox" class="subj-cb"
+                                            value="FullStackDevelopment" /> Full Stack</label>
+                                    <label class="checkbox-item"><input type="checkbox" class="subj-cb"
+                                            value="Data Structures" /> Data Structures</label>
+                                    <label class="checkbox-item"><input type="checkbox" class="subj-cb"
+                                            value="ComputerNetworks" /> Computer Networks</label>
+                                    <label class="checkbox-item"><input type="checkbox" class="subj-cb"
+                                            value="Operating System" /> Operating System</label>
+                                    <label class="checkbox-item"><input type="checkbox" class="subj-cb"
+                                            value="Python" /> Python</label>
+                                    <label class="checkbox-item"><input type="checkbox" class="subj-cb"
+                                            value="Mathematics" /> Mathematics</label>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn-3d btn-primary" id="saveBtn"
+                                style="padding:13px 30px;font-size:15px;">Save Changes ✅</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+
+    <script src="js/auth.js"></script>
+    <script>
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('show'); }
+        function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('show'); }
+
+        let currentUid = '';
+
+        function toggleEditMode() {
+            const card = document.getElementById('editCard');
+            const btn = document.getElementById('editBtn');
+            if (card.style.display === 'none') {
+                card.style.display = 'block';
+                btn.innerHTML = '❌ Cancel Edit';
+                btn.classList.replace('btn-primary', 'btn-secondary');
+                card.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                card.style.display = 'none';
+                btn.innerHTML = '✏️ Edit Profile';
+                btn.classList.replace('btn-secondary', 'btn-primary');
+            }
+        }
+
+        // ── Auth Guard + Init ──
+        (async () => {
+            const data = getCurrentUser();
+            if (!data || data.role !== 'student') {
+                window.location.href = 'student-login.html';
+                return;
+            }
+            currentUid = data.uid;
+
+            try {
+                const res = await fetch('api/get_profile.php', {
+                    headers: authHeader()
+                });
+                const json = await res.json();
+                if (json.success) {
+                    populateProfile(json.user, json.user.email);
+                    // Update local cache
+                    localStorage.setItem('vs_userdata', JSON.stringify(json.user));
+                }
+            } catch (e) {
+                console.error('Profile fetch error:', e);
+                populateProfile(data, data.email);
+            }
+        })();
+
+        function populateProfile(data, email) {
+            const name = data.name || '';
+            const initial = name[0]?.toUpperCase() || 'S';
+            document.getElementById('avatarInitial').textContent = initial;
+            document.getElementById('bigAvatar').childNodes[0].textContent = initial;
+            document.getElementById('sidebarName').textContent = name;
+            document.getElementById('profileName').textContent = name || '—';
+            document.getElementById('profileEmail').textContent = email || data.email || '—';
+            document.getElementById('profilePhone').textContent = data.mobile || data.phone || '—';
+            document.getElementById('profileLocation').textContent = data.location || '—';
+            document.getElementById('profileGender').textContent = data.gender || '—';
+            document.getElementById('profileDOB').textContent = data.dob ? `${data.dob} (${data.age || '—'} yrs)` : '—';
+            document.getElementById('profileCollege').textContent = data.college || '—';
+            document.getElementById('profileGrade').textContent = data.grade || '—';
+            document.getElementById('profileMode').textContent = data.availability || data.mode || '—';
+
+            // Subject tags
+            const tags = (data.subjects || []).map(s => `<span class="subject-tag">${s}</span>`).join('');
+            document.getElementById('profileSubjectTags').innerHTML = tags || '<span style="color:#aaa;font-size:13px;">None added</span>';
+
+            // Populate form
+            document.getElementById('p-phone').value = data.mobile || data.phone || '';
+            document.getElementById('p-email').value = email || data.email || '';
+            document.getElementById('p-gender').value = data.gender || '';
+            document.getElementById('p-dob').value = data.dob || '';
+            document.getElementById('p-college').value = data.college || '';
+            document.getElementById('p-location').value = data.location || '';
+            document.getElementById('p-grade').value = data.grade || '';
+            document.getElementById('p-mode').value = data.availability || data.mode || 'Online';
+
+            document.querySelectorAll('.subj-cb').forEach(cb => {
+                cb.checked = (data.subjects || []).includes(cb.value);
+            });
+        }
+
+        async function saveProfile(e) {
+            e.preventDefault();
+            const btn = document.getElementById('saveBtn');
+            btn.textContent = 'Saving…'; btn.disabled = true;
+            const subjects = [...document.querySelectorAll('.subj-cb:checked')].map(c => c.value);
+            const updates = {
+                name: document.getElementById('p-name').value.trim(),
+                phone: document.getElementById('p-phone').value.trim(),
+                college: document.getElementById('p-college').value.trim(),
+                location: document.getElementById('p-location').value.trim(),
+                gender: document.getElementById('p-gender').value,
+                dob: document.getElementById('p-dob').value,
+                grade: document.getElementById('p-grade').value.trim(),
+                mode: document.getElementById('p-mode').value,
+                subjects: subjects
+            };
+            // Calculate age if DOB provided
+            if (updates.dob) {
+                const birthDate = new Date(updates.dob);
+                const today = new Date();
+                let age = today.getFullYear() - birthDate.getFullYear();
+                const m = today.getMonth() - birthDate.getMonth();
+                if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+                updates.age = age;
+            }
+            try {
+                const res = await fetch('api/update_profile.php', {
+                    method: 'POST',
+                    headers: authHeader(),
+                    body: JSON.stringify(updates)
+                });
+                const json = await res.json();
+                if (json.success) {
+                    const saved = document.getElementById('savedMsg');
+                    saved.style.display = 'inline';
+                    setTimeout(() => {
+                        saved.style.display = 'none';
+                        toggleEditMode();
+                    }, 2000);
+                    showToast('Profile updated successfully!', 'success');
+
+                    // Refresh and update local cache
+                    const pRes = await fetch('api/get_profile.php', {
+                        headers: authHeader()
+                    });
+                    const pJson = await pRes.json();
+                    if (pJson.success) {
+                        localStorage.setItem('vs_userdata', JSON.stringify(pJson.user));
+                        populateProfile(pJson.user, pJson.user.email);
+                    }
+                } else {
+                    showToast('Failed to save: ' + json.message, 'error');
+                }
+            } catch (err) { showToast('Failed to save: ' + err.message, 'error'); }
+            finally { btn.textContent = 'Save Changes ✅'; btn.disabled = false; }
+        }
+    </script>
+</body>
+
+</html>

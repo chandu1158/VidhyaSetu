@@ -1,0 +1,31 @@
+/* Place your logo file in: assets/logo.png
+   All pages reference it as: <img src="../assets/logo.png" class="logo-img" alt="VidhyaSetu"/> */
+
+/* Logo image style */
+.logo-img {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    object-fit: contain;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.3), 0 8px 15px rgba(0, 0, 0, 0.4);
+    transition: 0.4s ease;
+    background: #352F44;
+    padding: 2px;
+}
+
+.logo-img:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 25px rgba(255, 255, 255, 0.6), 0 12px 25px rgba(0, 0, 0, 0.5);
+}
+
+/* Footer logo image */
+.footer-logo .logo-img {
+    width: 44px;
+    height: 44px;
+}
+
+/* Sidebar logo image */
+.sidebar-header .logo-img {
+    width: 44px;
+    height: 44px;
+}

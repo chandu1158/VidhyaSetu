@@ -1,0 +1,652 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register – VidhyaSetu</title>
+    <meta name="description" content="Create your free VidhyaSetu account as a student or tutor." />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="logo.css" />
+    <style>
+        .form-page {
+            padding: 30px 20px;
+            align-items: flex-start;
+        }
+
+        .reg-wrapper {
+            width: 100%;
+            max-width: 640px;
+            margin: 0 auto;
+        }
+
+        .photo-upload-box {
+            border: 2px dashed #ccc;
+            border-radius: 12px;
+            padding: 22px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+            background: #fafafa;
+            position: relative;
+        }
+
+        .photo-upload-box:hover {
+            border-color: var(--accent);
+            background: #f0eef5;
+        }
+
+        .photo-upload-box input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+
+        .photo-preview {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            display: none;
+            margin: 0 auto 8px;
+            border: 3px solid var(--accent);
+        }
+
+        .detect-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--light);
+            border: 2px solid #e0e0ee;
+            padding: 10px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--accent);
+            transition: 0.2s;
+            font-family: 'Outfit', sans-serif;
+            margin-top: 8px;
+        }
+
+        .detect-btn:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .status-options {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .status-option {
+            flex: 1 1 180px;
+        }
+
+        .status-option input {
+            display: none;
+        }
+
+        .status-label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: 2px solid #e0e0ee;
+            border-radius: 12px;
+            padding: 14px 18px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .status-label:hover {
+            border-color: var(--accent);
+            background: #f0eef5;
+        }
+
+        .status-option input:checked+.status-label {
+            border-color: var(--accent);
+            background: var(--accent);
+            color: white;
+        }
+
+        .form-section-title {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--accent);
+            padding: 10px 0 6px;
+            border-bottom: 1px solid var(--light);
+            margin-bottom: 18px;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="form-page">
+        <div class="reg-wrapper">
+            <div style="text-align:center;margin-bottom:20px;">
+                <a href="index.html" style="color:#b0afc0;font-size:14px;">← Back to Home</a>
+            </div>
+
+            <div class="form-card">
+                <div class="form-header">
+                    <img src="logo.png" class="logo-img" alt="VidhyaSetu"
+                        style="width:70px;height:70px;margin:0 auto 14px;display:block;" />
+                    <h2>Join VidhyaSetu</h2>
+                    <p>Create your free account today</p>
+                </div>
+
+                <!-- Tab Navigation -->
+                <div class="tab-nav">
+                    <button class="tab-btn active" id="tab-student" onclick="switchTab('student')">🎓 Student</button>
+                    <button class="tab-btn" id="tab-tutor" onclick="switchTab('tutor')">👨‍🏫 Tutor</button>
+                </div>
+
+                <!-- ============================= STUDENT FORM ============================= -->
+                <div class="tab-content active" id="student-tab">
+                    <form id="studentForm" onsubmit="handleStudentRegister(event)">
+
+                        <div class="form-section-title">Personal Information</div>
+                        <div class="form-group">
+                            <label>Create Your Unique User ID *</label>
+                            <div style="position:relative;">
+                                <input type="text" id="s-uid" placeholder="e.g. rahul_dev" required
+                                    oninput="checkUIDUniqueness('student', this.value, 's-uid-msg')" />
+                                <div id="s-uid-msg" style="font-size:12px; margin-top:4px;"></div>
+                            </div>
+                            <small style="color:#888;">This will be your unique identifier on the platform.</small>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Full Name *</label>
+                                <input type="text" id="s-name" placeholder="Enter your full name" required />
+                            </div>
+                            <div class="form-group">
+                                <label>Gender</label>
+                                <select id="s-gender">
+                                    <option value="">Select</option>
+                                    <option>Male</option>
+                                    <option>Female</option>
+                                    <option>Other</option>
+                                    <option>Prefer not to say</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Date of Birth</label>
+                                <input type="date" id="s-dob" onchange="calcAge('s-dob','s-age')" />
+                            </div>
+                            <div class="form-group">
+                                <label>Age</label>
+                                <input type="number" id="s-age" placeholder="Auto-calculated" readonly
+                                    style="background:#f0f0f0;" />
+                            </div>
+                        </div>
+
+                        <div class="form-section-title">Contact Details</div>
+                        <div class="form-group">
+                            <label>Email Address *</label>
+                            <input type="email" id="s-email" placeholder="you@example.com" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Phone Number *</label>
+                            <input type="tel" id="s-phone" placeholder="+91 XXXXX XXXXX" required />
+                        </div>
+
+                        <div class="form-section-title">Academic Info</div>
+                        <div class="form-group">
+                            <label>College / Institution Name *</label>
+                            <input type="text" id="s-college" placeholder="Your college or school" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Location *</label>
+                            <input type="text" id="s-location" placeholder="City, State" required />
+                            <button type="button" class="detect-btn" onclick="detectLocation('s-location')">
+                                📍 Detect My Location
+                            </button>
+                        </div>
+                        <div class="form-group">
+                            <label>Preferred Learning Mode *</label>
+                            <select id="s-mode" required>
+                                <option value="">Select mode</option>
+                                <option value="Online">Online</option>
+                                <option value="Offline">Offline</option>
+                                <option value="Both">Both Online & Offline</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Subjects Interested In</label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-item"><input type="checkbox" value="Java" /> Java</label>
+                                <label class="checkbox-item"><input type="checkbox" value="C-Language" /> C
+                                    Language</label>
+                                <label class="checkbox-item"><input type="checkbox" value="FullStackDevelopment" /> Full
+                                    Stack</label>
+                                <label class="checkbox-item"><input type="checkbox" value="Data Structures" /> Data
+                                    Structures</label>
+                                <label class="checkbox-item"><input type="checkbox" value="ComputerNetworks" /> Computer
+                                    Networks</label>
+                                <label class="checkbox-item"><input type="checkbox" value="Operating System" />
+                                    Operating System</label>
+                                <label class="checkbox-item"><input type="checkbox" value="Python" /> Python</label>
+                                <label class="checkbox-item"><input type="checkbox" value="Mathematics" />
+                                    Mathematics</label>
+                            </div>
+                        </div>
+
+                        <div class="form-section-title">Profile Photo</div>
+                        <div class="form-group">
+                            <div class="photo-upload-box" onclick="document.getElementById('s-photo-input').click()">
+                                <img id="s-photo-preview" class="photo-preview" />
+                                <div id="s-photo-placeholder">
+                                    <div style="font-size:36px;margin-bottom:8px;">📷</div>
+                                    <p style="font-size:14px;font-weight:600;color:var(--accent);">Click to upload photo
+                                    </p>
+                                    <p style="font-size:12px;color:#aaa;margin-top:4px;">JPG, PNG, GIF up to 5MB</p>
+                                </div>
+                                <input type="file" id="s-photo-input" accept="image/*" style="display:none;"
+                                    onchange="previewPhoto(this,'s-photo-preview','s-photo-placeholder')" />
+                            </div>
+                        </div>
+
+                        <div class="form-section-title">Account Security</div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Password *</label>
+                                <input type="password" id="s-password" placeholder="Minimum 6 characters" required
+                                    minlength="6" />
+                            </div>
+                            <div class="form-group">
+                                <label>Confirm Password *</label>
+                                <input type="password" id="s-confirm" placeholder="Repeat password" required />
+                            </div>
+                        </div>
+                        <div id="s-error"
+                            style="color:#c62828;font-size:13px;margin-bottom:14px;display:none;padding:10px 14px;background:#ffebee;border-radius:8px;">
+                        </div>
+                        <button type="submit" class="btn-3d btn-primary btn-block" id="s-submit"
+                            style="padding:15px;font-size:16px;margin-top:8px;">Create Student Account 🎓</button>
+                        <div class="form-link">Already have an account? <a href="student-login.html">Login here →</a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- ============================= TUTOR FORM ============================= -->
+                <div class="tab-content" id="tutor-tab">
+                    <form id="tutorForm" onsubmit="handleTutorRegister(event)">
+
+                        <div class="form-section-title">Personal Information</div>
+                        <div class="form-group">
+                            <label>Create Your Unique User ID *</label>
+                            <div style="position:relative;">
+                                <input type="text" id="t-uid" placeholder="e.g. tutor_expert" required
+                                    oninput="checkUIDUniqueness('tutor', this.value, 't-uid-msg')" />
+                                <div id="t-uid-msg" style="font-size:12px; margin-top:4px;"></div>
+                            </div>
+                            <small style="color:#888;">This will be your unique identifier on the platform.</small>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Full Name *</label>
+                                <input type="text" id="t-name" placeholder="Enter your full name" required />
+                            </div>
+                            <div class="form-group">
+                                <label>Gender</label>
+                                <select id="t-gender">
+                                    <option value="">Select</option>
+                                    <option>Male</option>
+                                    <option>Female</option>
+                                    <option>Other</option>
+                                    <option>Prefer not to say</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Date of Birth</label>
+                                <input type="date" id="t-dob" onchange="calcAge('t-dob','t-age')" />
+                            </div>
+                            <div class="form-group">
+                                <label>Age</label>
+                                <input type="number" id="t-age" placeholder="Auto-calculated" readonly
+                                    style="background:#f0f0f0;" />
+                            </div>
+                        </div>
+
+                        <div class="form-section-title">Contact Details</div>
+                        <div class="form-group">
+                            <label>Email Address *</label>
+                            <input type="email" id="t-email" placeholder="you@example.com" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Phone Number *</label>
+                            <input type="tel" id="t-phone" placeholder="+91 XXXXX XXXXX" required />
+                        </div>
+
+                        <div class="form-section-title">Professional Status *</div>
+                        <div class="form-group">
+                            <div class="status-options" id="t-status-group">
+                                <div class="status-option">
+                                    <input type="radio" name="t-status" id="status-student" value="Student" />
+                                    <label for="status-student" class="status-label">🎓 Student</label>
+                                </div>
+                                <div class="status-option">
+                                    <input type="radio" name="t-status" id="status-pro" value="Working Professional" />
+                                    <label for="status-pro" class="status-label">💼 Working Professional</label>
+                                </div>
+                            </div>
+                            <!-- Conditional: College field for students -->
+                            <div id="t-college-wrap" style="margin-top:14px;display:none;">
+                                <label>College / Institution</label>
+                                <input type="text" id="t-college" placeholder="Your college name" />
+                            </div>
+                            <!-- Conditional: Occupation + Experience for pros -->
+                            <div id="t-pro-wrap" style="margin-top:14px;display:none;">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Occupation</label>
+                                        <input type="text" id="t-occupation" placeholder="e.g., Software Engineer" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Years of Experience</label>
+                                        <select id="t-experience">
+                                            <option value="">Select</option>
+                                            <option value="Less than 1 year">Less than 1 year</option>
+                                            <option value="1-2 years">1–2 years</option>
+                                            <option value="3-5 years">3–5 years</option>
+                                            <option value="5+ years">5+ years</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section-title">Teaching Details</div>
+                        <div class="form-group">
+                            <label>Subject Wanted to Teach *</label>
+                            <select id="t-primary-subject" required>
+                                <option value="">Select Subject</option>
+                                <option value="Java">Java</option>
+                                <option value="C-Language">C Language</option>
+                                <option value="FullStackDevelopment">Full Stack Development</option>
+                                <option value="Data Structures">Data Structures</option>
+                                <option value="ComputerNetworks">Computer Networks</option>
+                                <option value="Operating System">Operating Systems</option>
+                            </select>
+                            <small style="color:#888;font-size:12px;margin-top:6px;display:block;">⚠️ You will be tested
+                                on this subject after registration</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Additional Subjects (optional)</label>
+                            <div class="checkbox-group" id="t-subjects">
+                                <label class="checkbox-item"><input type="checkbox" value="Java" /> Java</label>
+                                <label class="checkbox-item"><input type="checkbox" value="C-Language" /> C
+                                    Language</label>
+                                <label class="checkbox-item"><input type="checkbox" value="FullStackDevelopment" /> Full
+                                    Stack</label>
+                                <label class="checkbox-item"><input type="checkbox" value="Data Structures" /> Data
+                                    Structures</label>
+                                <label class="checkbox-item"><input type="checkbox" value="ComputerNetworks" /> Computer
+                                    Networks</label>
+                                <label class="checkbox-item"><input type="checkbox" value="Operating System" />
+                                    Operating System</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Teaching Mode *</label>
+                            <select id="t-mode" required>
+                                <option value="">Select</option>
+                                <option value="Online">Online</option>
+                                <option value="Offline">Offline</option>
+                                <option value="Both">Both Online & Offline</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Location *</label>
+                            <input type="text" id="t-location" placeholder="City, State" required />
+                            <button type="button" class="detect-btn" onclick="detectLocation('t-location')">
+                                📍 Detect My Location
+                            </button>
+                        </div>
+
+                        <div class="form-section-title">Profile Photo</div>
+                        <div class="form-group">
+                            <div class="photo-upload-box" onclick="document.getElementById('t-photo-input').click()">
+                                <img id="t-photo-preview" class="photo-preview" />
+                                <div id="t-photo-placeholder">
+                                    <div style="font-size:36px;margin-bottom:8px;">📷</div>
+                                    <p style="font-size:14px;font-weight:600;color:var(--accent);">Click to upload photo
+                                    </p>
+                                    <p style="font-size:12px;color:#aaa;margin-top:4px;">JPG, PNG up to 5MB</p>
+                                </div>
+                                <input type="file" id="t-photo-input" accept="image/*" style="display:none;"
+                                    onchange="previewPhoto(this,'t-photo-preview','t-photo-placeholder')" />
+                            </div>
+                        </div>
+
+                        <div class="form-section-title">Account Security</div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Password *</label>
+                                <input type="password" id="t-password" placeholder="Minimum 6 characters" required
+                                    minlength="6" />
+                            </div>
+                            <div class="form-group">
+                                <label>Confirm Password *</label>
+                                <input type="password" id="t-confirm" placeholder="Repeat password" required />
+                            </div>
+                        </div>
+
+                        <!-- Skill Test Warning -->
+                        <div
+                            style="background:#fff8e1;border:1px solid #ffcc02;border-radius:12px;padding:16px 18px;margin-bottom:18px;display:flex;gap:12px;align-items:flex-start;">
+                            <span style="font-size:22px;flex-shrink:0;">⚠️</span>
+                            <div>
+                                <strong style="font-size:14px;color:#e65100;">Skill Test Required</strong>
+                                <p style="font-size:13px;color:#795548;margin-top:4px;line-height:1.6;">After
+                                    registration, you'll be redirected to a <strong>skill verification test</strong> on
+                                    your selected subject. Anti-cheat monitoring is enabled. You must pass to activate
+                                    your profile.</p>
+                            </div>
+                        </div>
+
+                        <div id="t-error"
+                            style="color:#c62828;font-size:13px;margin-bottom:14px;display:none;padding:10px 14px;background:#ffebee;border-radius:8px;">
+                        </div>
+                        <button type="submit" class="btn-3d btn-primary btn-block" id="t-submit"
+                            style="padding:15px;font-size:16px;margin-top:4px;">Register & Take Skill Test 🧪</button>
+                        <div class="form-link">Already have an account? <a href="tutor-login.html">Login here →</a>
+                        </div>
+                    </form>
+                </div>
+            </div><!-- /form-card -->
+
+            <p style="text-align:center;color:#b0afc0;font-size:13px;margin-top:20px;">
+                By registering, you agree to our <a href="terms.html"
+                    style="color:#b0afc0;text-decoration:underline;">Terms</a> and <a href="privacy.html"
+                    style="color:#b0afc0;text-decoration:underline;">Privacy Policy</a>.
+            </p>
+        </div><!-- /reg-wrapper -->
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <!-- Firebase SDKs -->
+    
+    <script src="js/auth.js"></script>
+
+    <script>
+        /* ---- Tab Switch ---- */
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById('tab-' + tab).classList.add('active');
+            document.getElementById(tab + '-tab').classList.add('active');
+        }
+
+        /* ---- Auto-calculate Age ---- */
+        function calcAge(dobId, ageId) {
+            const dob = new Date(document.getElementById(dobId).value);
+            if (isNaN(dob)) return;
+            const today = new Date();
+            let age = today.getFullYear() - dob.getFullYear();
+            const m = today.getMonth() - dob.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+            document.getElementById(ageId).value = age > 0 ? age : '';
+        }
+
+        /* ---- Profile Photo Preview ---- */
+        function previewPhoto(input, previewId, placeholderId) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                const img = document.getElementById(previewId);
+                img.src = e.target.result;
+                img.style.display = 'block';
+                document.getElementById(placeholderId).style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        /* ---- Detect Location ---- */
+        function detectLocation(inputId) {
+            const btn = event.target;
+            btn.textContent = '⏳ Detecting…';
+            btn.disabled = true;
+            navigator.geolocation.getCurrentPosition(
+                async pos => {
+                    const { latitude, longitude } = pos.coords;
+                    try {
+                        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`);
+                        const data = await res.json();
+                        const city = data.address.city || data.address.town || data.address.village || '';
+                        const state = data.address.state || '';
+                        document.getElementById(inputId).value = `${city}, ${state}`.trim().replace(/^,\s*/, '');
+                    } catch {
+                        document.getElementById(inputId).value = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+                    }
+                    btn.textContent = '📍 Detect My Location';
+                    btn.disabled = false;
+                },
+                () => {
+                    alert('Unable to detect location. Please enter manually.');
+                    btn.textContent = '📍 Detect My Location';
+                    btn.disabled = false;
+                }
+            );
+        }
+
+        /* ---- Status Radio Toggle ---- */
+        document.querySelectorAll('input[name="t-status"]').forEach(radio => {
+            radio.addEventListener('change', function () {
+                document.getElementById('t-college-wrap').style.display = this.value === 'Student' ? 'block' : 'none';
+                document.getElementById('t-pro-wrap').style.display = this.value === 'Working Professional' ? 'block' : 'none';
+            });
+        });
+
+        /* ---- Helper ---- */
+        function getChecked(groupId) {
+            return [...document.querySelectorAll(`#${groupId} input[type=checkbox]:checked`)].map(c => c.value);
+        }
+        function showError(id, msg) {
+            const el = document.getElementById(id);
+            el.textContent = msg;
+            el.style.display = msg ? 'block' : 'none';
+        }
+
+        /* ---- Student Register ---- */
+        async function handleStudentRegister(e) {
+            e.preventDefault();
+            const pass = document.getElementById('s-password').value;
+            if (pass !== document.getElementById('s-confirm').value) { showError('s-error', 'Passwords do not match.'); return; }
+            // Validate UID availability before submitting
+            const uidEl = document.getElementById('s-uid');
+            const uidMsg = document.getElementById('s-uid-msg');
+            if (uidMsg && uidMsg.innerHTML.includes('❌')) { showError('s-error', 'Your chosen User ID is already taken.'); return; }
+            showError('s-error', '');
+            const btn = document.getElementById('s-submit');
+            btn.textContent = 'Creating account…'; btn.disabled = true;
+            try {
+                await registerStudent({
+                    uid: uidEl ? uidEl.value.trim() : '',
+                    name: document.getElementById('s-name').value.trim(),
+                    gender: document.getElementById('s-gender').value,
+                    dob: document.getElementById('s-dob').value,
+                    age: document.getElementById('s-age').value,
+                    email: document.getElementById('s-email').value.trim(),
+                    mobile: document.getElementById('s-phone').value.trim(),
+                    college: document.getElementById('s-college').value.trim(),
+                    location: document.getElementById('s-location').value.trim(),
+                    mode: document.getElementById('s-mode').value,
+                    availability: document.getElementById('s-mode').value,
+                    subjects: getChecked('student-tab'),
+                    password: pass
+                });
+            } catch (err) {
+                showError('s-error', err.message || 'Registration failed. Please try again.');
+            } finally {
+                btn.textContent = 'Create Student Account 🎓'; btn.disabled = false;
+            }
+        }
+
+        /* ---- Tutor Register ---- */
+        async function handleTutorRegister(e) {
+            e.preventDefault();
+            const pass = document.getElementById('t-password').value;
+            if (pass !== document.getElementById('t-confirm').value) { showError('t-error', 'Passwords do not match.'); return; }
+            const primarySubject = document.getElementById('t-primary-subject').value;
+            if (!primarySubject) { showError('t-error', 'Please select a subject to teach.'); return; }
+            const statusEl = document.querySelector('input[name="t-status"]:checked');
+            if (!statusEl) { showError('t-error', 'Please select your status (Student / Working Professional).'); return; }
+            // Validate UID availability
+            const uidEl = document.getElementById('t-uid');
+            const uidMsg = document.getElementById('t-uid-msg');
+            if (uidMsg && uidMsg.innerHTML.includes('❌')) { showError('t-error', 'Your chosen User ID is already taken.'); return; }
+            showError('t-error', '');
+
+            const btn = document.getElementById('t-submit');
+            btn.textContent = 'Registering…'; btn.disabled = true;
+
+            const additionalSubjects = getChecked('t-subjects');
+            const allSubjects = [...new Set([primarySubject, ...additionalSubjects])];
+
+            try {
+                await registerTutor({
+                    uid: uidEl ? uidEl.value.trim() : '',
+                    name: document.getElementById('t-name').value.trim(),
+                    gender: document.getElementById('t-gender').value,
+                    dob: document.getElementById('t-dob').value,
+                    age: document.getElementById('t-age').value,
+                    email: document.getElementById('t-email').value.trim(),
+                    mobile: document.getElementById('t-phone').value.trim(),
+                    status: statusEl.value,
+                    college: document.getElementById('t-college').value.trim(),
+                    occupation: document.getElementById('t-occupation').value.trim(),
+                    experience: document.getElementById('t-experience').value,
+                    subjects: allSubjects,
+                    primarySubject: primarySubject,
+                    availability: document.getElementById('t-mode').value,
+                    location: document.getElementById('t-location').value.trim(),
+                    password: pass
+                });
+            } catch (err) {
+                showError('t-error', err.message || 'Registration failed. Please try again.');
+            } finally {
+                btn.textContent = 'Register & Take Skill Test 🧪'; btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+
+</html>

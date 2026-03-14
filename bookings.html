@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Bookings – VidhyaSetu</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="logo.css" />
+</head>
+
+<body>
+    <div class="dashboard-layout">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <img src="logo.png" class="logo-img" alt="VidhyaSetu" />
+                    <div>
+                        <h3>VidhyaSetu</h3><span>Student Panel</span>
+                    </div>
+                </div>
+            </div>
+            <div class="sidebar-user">
+                <div class="user-avatar" id="avatarInitial">S</div>
+                <div class="user-info">
+                    <h4 id="sidebarName">Student</h4><span>Student</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section-title">Main</div>
+                <a href="dashboard.html"><span class="nav-icon">🏠</span> Dashboard</a>
+                <a href="search.html"><span class="nav-icon">🔍</span> Find a Tutor</a>
+                <a href="bookings.html" class="active"><span class="nav-icon">📅</span> My Bookings</a>
+                <div class="nav-section-title">Learning</div>
+                <a href="chat.html"><span class="nav-icon">💬</span> Chat</a>
+                <div class="nav-section-title">Account</div>
+                <a href="profile.html"><span class="nav-icon">👤</span> My Profile</a>
+                <a href="#" class="logout-link" onclick="logout()"><span class="nav-icon">🚪</span> Logout</a>
+            </nav>
+        </aside>
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+        <main class="main-content">
+            <div class="top-bar">
+                <div style="display:flex;align-items:center;gap:14px;">
+                    <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+                    <h2>My Bookings</h2>
+                </div>
+                <div class="top-bar-right">
+                    <a href="search.html" class="notification-btn" title="Find Tutors"
+                        style="text-decoration:none;margin-right:8px;">🔍</a>
+                    <button class="notification-btn">🔔</button>
+                    <div class="user-avatar" style="width:38px;height:38px;font-size:14px;" id="topAvatar">S</div>
+                </div>
+            </div>
+
+            <div class="page-body">
+                <!-- Tab filters -->
+                <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px;">
+                    <button class="btn-3d btn-primary btn-sm filter-tab active" data-tab="all"
+                        onclick="filterTab(this,'all')">All</button>
+                    <button class="btn-3d btn-sm filter-tab" data-tab="pending" onclick="filterTab(this,'pending')"
+                        style="background:#fff3e0;color:#e65100;box-shadow:0 4px #e8d5b0;">⏳ Pending</button>
+                    <button class="btn-3d btn-sm filter-tab" data-tab="confirmed" onclick="filterTab(this,'confirmed')"
+                        style="background:#e8f5e9;color:#2e7d32;box-shadow:0 4px #b8d8b8;">✅ Confirmed</button>
+                    <button class="btn-3d btn-sm filter-tab" data-tab="completed" onclick="filterTab(this,'completed')"
+                        style="background:#e3f2fd;color:#1565c0;box-shadow:0 4px #b0d0f0;">🎓 Completed</button>
+                    <button class="btn-3d btn-sm filter-tab" data-tab="cancelled" onclick="filterTab(this,'cancelled')"
+                        style="background:#ffebee;color:#c62828;box-shadow:0 4px #f0b8b8;">❌ Cancelled</button>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Booking History</h3>
+                        <span class="badge badge-info" id="bookingCount">0 bookings</span>
+                    </div>
+                    <div id="bookingsList">
+                        <div style="text-align:center;padding:60px 20px;color:#aaa;">
+                            <div style="font-size:56px;margin-bottom:16px;">📅</div>
+                            <h3 style="color:#bbb;margin-bottom:10px;">No bookings yet</h3>
+                            <p>Start by <a href="search.html" style="color:var(--accent);font-weight:600;">finding a
+                                    tutor</a>!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+
+    <script src="js/auth.js"></script>
+    <script>
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('show'); }
+        function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('show'); }
+
+        let allBookings = [];
+
+        // ── Auth Guard + Init ──
+        (async () => {
+            const data = getCurrentUser();
+            if (!data || data.role !== 'student') {
+                window.location.href = 'student-login.html';
+                return;
+            }
+            const initial = (data.name || 'S')[0].toUpperCase();
+            document.getElementById('avatarInitial').textContent = initial;
+            document.getElementById('topAvatar').textContent = initial;
+            document.getElementById('sidebarName').textContent = data.name || 'Student';
+
+            try {
+                const res = await fetch(`api/get_bookings.php`, {
+                    headers: authHeader()
+                });
+                const json = await res.json();
+                allBookings = json.bookings || [];
+            } catch (e) {
+                console.error('Fetch error:', e);
+                allBookings = [];
+            }
+            renderBookings(allBookings);
+        })();
+
+        function renderBookings(list) {
+            document.getElementById('bookingCount').textContent = `${list.length} booking${list.length !== 1 ? 's' : ''}`;
+            if (!list.length) {
+                document.getElementById('bookingsList').innerHTML = `
+                    <div style="text-align:center;padding:60px 20px;color:#aaa;">
+                        <div style="font-size:56px;margin-bottom:16px;">📅</div>
+                        <h3 style="color:#bbb;margin-bottom:10px;">No bookings found</h3>
+                        <p>Try adjusting your tabs or start <a href="search.html" style="color:var(--accent);font-weight:600;">finding a tutor</a>!</p>
+                    </div>`;
+                return;
+            }
+            const statusMap = { pending: 'badge-warning', confirmed: 'badge-success', completed: 'badge-info', cancelled: 'badge-danger' };
+            const iconMap = { pending: '⏳', confirmed: '✅', completed: '🎓', cancelled: '❌' };
+            document.getElementById('bookingsList').innerHTML = `
+        <div style="overflow-x:auto;">
+        <table class="data-table">
+            <thead><tr><th>Subject</th><th>Tutor</th><th>Contact</th><th>Date</th><th>Time</th><th>Mode</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>${list.map(b => `<tr>
+                <td><strong>${b.subject || '—'}</strong></td>
+                <td>${b.tutor_name || b.tutorName || 'Tutor'}</td>
+                <td><div style="font-size:12px;color:#666;">📧 ${b.tutor_email || '—'}<br>📞 ${b.tutor_mobile || '—'}</div></td>
+                <td>${b.date || '—'}</td>
+                <td>${b.time || '—'}</td>
+                <td><span class="badge badge-purple">${b.mode || 'Online'}</span></td>
+                <td><span class="badge ${statusMap[b.status] || 'badge-info'}">${iconMap[b.status] || ''} ${b.status || 'pending'}</span></td>
+                <td>
+                    <div style="display:flex;gap:8px;align-items:center;">
+                        ${b.status === 'pending' ? `<button class="btn-3d btn-sm btn-danger" onclick="cancelBooking('${b.id}')">Cancel</button>` :
+                    b.status === 'confirmed' ? `<a href="chat.html?uid=${b.tutor_id}" class="btn-3d btn-sm btn-primary">Chat 💬</a>` :
+                        b.status === 'completed' ? `
+                            <a href="chat.html?uid=${b.tutor_id}" class="btn-3d btn-sm btn-secondary" title="Chat with Tutor">💬</a>
+                            ${!b.rating ? `<button class="btn-3d btn-sm btn-success" onclick="openRatingModal('${b.id}', '${b.tutor_name || 'Tutor'}')">⭐ Rate Tutor</button>` :
+                                `<span style="color:var(--accent);font-weight:600;font-size:13px;">Rated ${b.rating} ⭐</span>`}
+                        ` : '—'}
+                    </div>
+                </td>
+            </tr>`).join('')}</tbody>
+        </table></div>`;
+        }
+
+        function filterTab(el, tab) {
+            document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+            renderBookings(tab === 'all' ? allBookings : allBookings.filter(b => b.status === tab));
+        }
+
+        let ratingBookingId = null;
+        function openRatingModal(id, name) {
+            ratingBookingId = id;
+            document.getElementById('ratingTutorName').textContent = name;
+            document.getElementById('ratingModal').classList.add('open');
+            // Reset modal
+            document.getElementById('ratingScore').value = "5";
+            document.getElementById('ratingReview').value = "";
+            updateStars(5);
+        }
+
+        function closeRatingModal() { document.getElementById('ratingModal').classList.remove('open'); }
+
+        function updateStars(val) {
+            const container = document.getElementById('starContainer');
+            container.innerHTML = [1, 2, 3, 4, 5].map(i =>
+                `<span onclick="setRating(${i})" style="cursor:pointer;font-size:32px;color:${i <= val ? '#FFD700' : '#ddd'}">${i <= val ? '★' : '☆'}</span>`
+            ).join(' ');
+            document.getElementById('ratingScore').value = val;
+        }
+
+        function setRating(val) { updateStars(val); }
+
+        async function submitRating() {
+            const rating = document.getElementById('ratingScore').value;
+            const review = document.getElementById('ratingReview').value;
+            const btn = document.getElementById('submitRatingBtn');
+            btn.textContent = 'Submitting...'; btn.disabled = true;
+
+            try {
+                const res = await fetch('api/submit_rating.php', {
+                    method: 'POST',
+                    headers: authHeader(),
+                    body: JSON.stringify({ bookingId: ratingBookingId, rating, review })
+                });
+                const json = await res.json();
+                if (json.success) {
+                    showToast('Thank you for your rating!', 'success');
+                    closeRatingModal();
+                    // Update local data
+                    allBookings = allBookings.map(b => b.id == ratingBookingId ? { ...b, rating: rating } : b);
+                    renderBookings(allBookings);
+                } else {
+                    showToast(json.message || 'Failed to submit rating.', 'error');
+                }
+            } catch (e) {
+                console.error('Rating error:', e);
+                showToast('Error submitting rating.', 'error');
+            } finally {
+                btn.textContent = 'Submit Rating'; btn.disabled = false;
+            }
+        }
+
+        async function cancelBooking(id) {
+            if (!confirm('Cancel this booking?')) return;
+            try {
+                const res = await fetch('api/update_status.php', {
+                    method: 'POST',
+                    headers: authHeader(),
+                    body: JSON.stringify({ bookingId: id, status: 'cancelled' })
+                });
+                const json = await res.json();
+                if (json.success) {
+                    allBookings = allBookings.map(b => b.id == id ? { ...b, status: 'cancelled' } : b);
+                    renderBookings(allBookings);
+                    showToast('Booking cancelled.', 'info');
+                } else {
+                    showToast(json.message || 'Could not cancel.', 'error');
+                }
+            } catch (e) {
+                console.error('Cancel error:', e);
+                showToast('Could not cancel. Try again.', 'error');
+            }
+        }
+    </script>
+
+    <!-- Rating Modal -->
+    <div class="modal-overlay" id="ratingModal">
+        <div class="modal" style="max-width:400px;text-align:center;">
+            <div class="modal-header">
+                <h3>⭐ Rate Your Tutor</h3>
+                <button class="modal-close" onclick="closeRatingModal()">✕</button>
+            </div>
+            <div style="margin-bottom:20px;">
+                <p>How was your session with <strong id="ratingTutorName">Tutor</strong>?</p>
+                <div id="starContainer" style="margin:16px 0;"></div>
+                <input type="hidden" id="ratingScore" value="5">
+            </div>
+            <div class="form-group" style="text-align:left;">
+                <label>Share your experience (Optional)</label>
+                <textarea id="ratingReview" placeholder="He was great at explaining things..."
+                    style="min-height:80px;"></textarea>
+            </div>
+            <button class="btn-3d btn-primary btn-block" id="submitRatingBtn" onclick="submitRating()">Submit
+                Rating</button>
+        </div>
+    </div>
+</body>
+
+</html>
