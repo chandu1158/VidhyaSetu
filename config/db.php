@@ -8,6 +8,19 @@ define('DB_HOST', 'db.dblqxmnyozsfmtwkjbti.supabase.co');
 define('DB_USER', 'postgres');
 define('DB_PASS', 'Chandu@910054');
 define('DB_NAME', 'postgres');
+
+
+$conn = mysqli_connect(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+
+if ($conn) {
+    echo "✅ Database Connected Successfully!";
+} else {
+    echo "❌ Connection Failed: " . mysqli_connect_error();
+}
+?>
+
+
+
 // ── CORS Headers ─────────────────────────────────────────────
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
